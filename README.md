@@ -1,4 +1,4 @@
-This work, "RxJavaFx tutorial", is a derivative of "[Learning RxJava with JavaFx]([https://thomasnield.gitbooks.io/rxjavafx-guide/content/](https://thomasnield.gitbooks.io/rxjavafx-guide/content/))" by [Thomas Nield](http://tomstechnicalblog.blogspot.com/), used under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/). "RxJavaFx tutorial" is licensed under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/) by [Przemysław Krysztofiak] / material modified.
+This work, "RxJavaFx tutorial", is a derivative of "[Learning RxJava with JavaFx]([https://thomasnield.gitbooks.io/rxjavafx-guide/content/](https://thomasnield.gitbooks.io/rxjavafx-guide/content/))" by [Thomas Nield](http://tomstechnicalblog.blogspot.com/), used under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/). "RxJavaFx tutorial" is licensed under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/) by Przemysław Krysztofiak / material modified.
 
 
 # RxJavaFx tutorial
