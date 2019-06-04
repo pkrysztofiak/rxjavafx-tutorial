@@ -335,6 +335,7 @@ Observable.just("one", "two", "three")
 .subscribe(System.out::println);
 ```
 Example016
+Produces output:
 
     0
     3
@@ -354,4 +355,40 @@ Example017
 Produces output:
 
     19
-   
+#### flatMapSingle()
+flatMapSingle() can be used to flatMap() to a Single, and flatMapMaybe() to a Maybe. This saves you the step of having to call toObservable() on each resulting Maybe or Single. If we wanted to sum each set of numbers, we would do it like this since this reduce() will yield a Single.
+```java
+Observable.just("1;2;3", "1;1", "4;4;1;2")
+.flatMapSingle(numbers ->
+	Observable.fromArray(numbers.split(";"))
+	.map(Integer::valueOf)
+	.reduce(0, (current, next) -> current + next))
+.subscribe(System.out::println);
+```
+Example018
+Produces output:
+
+    6
+    2
+    11
+### Events Observable    
+So far we just pushed data out of Observables. But did you know you can push events too? As stated earlier, data and events are basically the same thing in RxJava. Let's take a simple JavaFX Application with a single Button.
+```java
+Button button = new Button("Click me!");
+stage.setScene(new Scene(button));
+stage.show();
+
+JavaFxObservable.actionEventsOf(button).subscribe(actionEvent -> {
+	System.out.println(actionEvent.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(actionEvent)));
+});
+button.setOnAction(actionEvent -> {
+	System.out.println(actionEvent.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(actionEvent)));
+});
+```
+Example019
+On every button click produces output:
+
+javafx.event.ActionEvent@2a2e1055
+javafx.event.ActionEvent@2a2e1055
+
+Events we using the actionEvent we handle is the same object.
