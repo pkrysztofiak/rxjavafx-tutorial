@@ -1,4 +1,4 @@
-This work, "RxJavaFx tutorial", is a derivative of "[Learning RxJava with JavaFx]([https://thomasnield.gitbooks.io/rxjavafx-guide/content/](https://thomasnield.gitbooks.io/rxjavafx-guide/content/))" by [Thomas Nield](http://tomstechnicalblog.blogspot.com/), used under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/). "RxJavaFx tutorial" is licensed under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/) by Przemysław Krysztofiak / material modified.
+This work, "RxJavaFx tutorial", is a derivative of "[Learning RxJava with JavaFx]([https://thomasnield.gitbooks.io/rxjavafx-guide/content/](https://thomasnield.gitbooks.io/rxjavafx-guide/content/))" by [Thomas Nield](http://tomstechnicalblog.blogspot.com/), used under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/) / material modified. "RxJavaFx tutorial" is licensed under [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/2.0/) by Przemysław Krysztofiak.
 
 
 # RxJavaFx tutorial
@@ -242,3 +242,116 @@ Produces output:
 
     onSucces=[one, two, three, four, five]
 #### reduce()
+When you need to do a custom aggregation or reduction, you can use reduce() to achieve this in most cases (to aggregate into collections and other mutable structures, you can use its cousin collect() ). This will return a Single (if a "seed" value is provided) or a Maybe (if no "seed" value is provided). But say we wanted the sum of all lengths for all emissions. Starting with a seed value of zero, we can use a lambda specifying how to "fold" the emissions into a single value.
+```java
+Observable.just("one", "two", "three")
+.map(String::length)
+.reduce(0, (current, next) -> current + next)
+.subscribe(new SingleObserver<Integer>() {
+
+	@Override
+	public void onSubscribe(Disposable disposable) {
+	}
+
+	@Override
+	public void onSuccess(Integer single) {
+		System.out.println("sum=" + single);
+	}
+
+	@Override
+	public void onError(Throwable throwable) {
+	}
+});
+```
+Example013
+Produces output:
+
+    sum=11
+```java    
+Observable.just("one", "two", "three")
+.map(String::length)
+.reduce((current, next) -> current + next)
+.subscribe(new MaybeObserver<Integer>() {
+
+	@Override
+	public void onSubscribe(Disposable disposable) {
+	}
+
+	@Override
+	public void onSuccess(Integer single) {
+		System.out.println("sum=" + single);
+	}
+
+	@Override
+	public void onError(Throwable e) {
+	}
+
+	@Override
+	public void onComplete() {
+		System.out.println("completed!");
+	}
+});
+```
+Example014
+Produces output:
+
+    sum=11
+As we can see onComplete() method was not called. It would be called if Observable does not produce any emission.
+```java
+Observable.<String>empty()
+.map(String::length)
+.reduce((current, next) -> current + next)
+.subscribe(new MaybeObserver<Integer>() {
+
+	@Override
+	public void onSubscribe(Disposable disposable) {
+	}
+
+	@Override
+	public void onSuccess(Integer single) {
+		System.out.println("sum=" + single);
+	}
+
+	@Override
+	public void onError(Throwable e) {
+	}
+
+	@Override
+	public void onComplete() {
+		System.out.println("completed!");
+	}
+});
+```
+Example015
+Produces output:
+
+    completed!
+#### scan()
+The reduce() will push a single aggregated value derived from all the emissions. If you want to push the "running total" for each emission, you can use scan() instead. This can work with infinite Observables since it will push each accumulation for each emission, rather than waiting for all emissions to be accumulated.
+```java
+Observable.just("one", "two", "three")
+.map(String::length)
+.scan(0, (current, next) -> current + next)
+.subscribe(System.out::println);
+```
+Example016
+
+    0
+    3
+    6
+    11
+#### flatMap()
+The flatMap() is similar to map() , but will map the emission to another set of emissions via another Observable . This is one of the most powerful operators in RxJava and is full of use cases, but for now we will just stick with a simple example.
+Say we have some String emissions where each contains concatenated numbers separated by semicolon. We want to break up these numbers into separate emissions (and omit the semicolons). You can call split() on each String and specify splitting on the semicolons, and this will return an array of the separated String values. Then you can turn that array into an Observable inside the flatMap().
+```java
+Observable.just("1;2;3", "1;1", "4;4;1;2")
+.flatMap(numbers -> Observable.fromArray(numbers.split(";")))
+.map(Integer::valueOf)
+.reduce((current, next) -> current + next)
+.subscribe(System.out::println);
+```
+Example017
+Produces output:
+
+    19
+   
