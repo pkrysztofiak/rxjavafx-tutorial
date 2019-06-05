@@ -395,6 +395,7 @@ public class Client {
 		return itemsSold;
 	}
 }
+
 public class Route {
 	private final List<Client> clients = new ArrayList<>();
 
@@ -450,4 +451,32 @@ On every button click produces output:
     javafx.event.ActionEvent@2a2e1055
     javafx.event.ActionEvent@2a2e1055
 As you can see the event object is the same.
+Moreover, did we just treat the ActionEvent like any other emission and push it through the Observable? Yes we did! As said earlier, this is the powerful part of RxJava. It treats events and data the same way, and you can use all the operators we covered earlier. 
+Task4
+For example, we can use scan() to push how many times the Button was pressed, and push that into a Label . Just map() each ActionEvent to a 1 to drive increments.
+#### Cold vs. hot observables
+The Observable\<ActionEvent> we created off a Button is an example of a hot Observable . Earlier, all of our examples emitting Integer and String items are cold Observables. So what is the difference?
+Remember this source Observable that simply pushes five String emissions?
+
+    Observable.just("one", "two", "three", "four", "five")
+What do you think will happen if we subscribe() to it twice? Let's try it out.
+```java
+	Observable<String> source = Observable.just("one", "two", "three", "four", "five");
+	source.subscribe(next -> System.out.println("[Observer1] next=" + next));
+	source.subscribe(next -> System.out.println("[Observer2] next=" + next))
+```
+Produces output:
+
+    [Observer1] next=one
+    [Observer1] next=two
+    [Observer1] next=three
+    [Observer1] next=four
+    [Observer1] next=five
+    [Observer2] next=one
+    [Observer2] next=two
+    [Observer2] next=three
+    [Observer2] next=four
+    [Observer2] next=five
+Emissions are replayed for each Observer .	
+With a Cold Observable, every Observer independently receives all the emissions regardless of when they Subscribe. There is no notion of timing making an impact to which emissions they receive. Cold Observables are often used to "play" data independently to each Observer . This is like giving every Observer a music CD to play, and they can independently play all the tracks. Hot Observables, however, will simultaneously push emissions to all Observers at the same time. Logically, an effect of this is Observers that come later and have missed previous emissions will not receive them. They will only get emissions going forward from the time they subscribe() . Instead of a music CD, Hot Observables are more like radio stations. They will broadcast a given song (emission) to all listeners (Observers) at the same time. If a listener misses a song, they missed it. While data and events are the same in RxJava, Hot Observables are often used to represent events, such as an Observable\<ActionEvent> built off a Button.
 
