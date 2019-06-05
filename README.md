@@ -479,4 +479,216 @@ Produces output:
     [Observer2] next=five
 Emissions are replayed for each Observer .	
 With a Cold Observable, every Observer independently receives all the emissions regardless of when they Subscribe. There is no notion of timing making an impact to which emissions they receive. Cold Observables are often used to "play" data independently to each Observer . This is like giving every Observer a music CD to play, and they can independently play all the tracks. Hot Observables, however, will simultaneously push emissions to all Observers at the same time. Logically, an effect of this is Observers that come later and have missed previous emissions will not receive them. They will only get emissions going forward from the time they subscribe() . Instead of a music CD, Hot Observables are more like radio stations. They will broadcast a given song (emission) to all listeners (Observers) at the same time. If a listener misses a song, they missed it. While data and events are the same in RxJava, Hot Observables are often used to represent events, such as an Observable\<ActionEvent> built off a Button.
+#### Unsubscribing
+There is one last operation we need to cover: unsubscribing. Unsubscription should happen automatically for finite Observables once onComplete() is called. But for infinite or long-running Observables, there will be times you want to stop the emissions and cancel the entire operation. This will also free up resources in the Observable chain and clean up any resources it was using.
+If you want to disconnect an Observer from an Observable so it stops receiving emissions, there are a couple ways to do this. The easiest way is to note the subscribe() method returns a Disposable object. This represents the connection between the Observable and the Observer , and you can call dispose() on it at any time to dispose the connections so no more emissions are pushed.
+For instance, let's take our incrementing Button example from earlier and add another Button that will unsubscribe the emissions. We need to save the Disposable returned from the subscribe() method, and then we can refer to it later to call dispose() and stop emissions.
+Example16
+```java
+	Button button = new Button("+");
+	Label label = new Label();
+	Button unsubscribeButton = new Button("Unsubscribe!");
+	HBox hBox = new HBox(button, label, unsubscribeButton);
+	stage.setScene(new Scene(hBox));
+	stage.show();
 
+	Disposable disposable = JavaFxObservable.actionEventsOf(button)
+	.map(actionEvent -> 1)
+	.scan(0, (current, next) -> current + next)
+	.map(String::valueOf)
+	.subscribe(
+			label::setText,
+			Throwable::printStackTrace,
+			() -> System.out.println("completed!"));
+
+	JavaFxObservable.actionEventsOf(unsubscribeButton).subscribe(next -> disposable.dispose());
+```
+Note that when you press the "Unsubscribe" Button , the increments stop because the Observer was disposed, and it instructed the Observable to stop sending emissions. Disposal automatically happens with finite Observables once onComplete() is called. But with infinite or long-running Observables, you need to manage their disposal if you intend to terminate them at some point. When you have infinite Observables that need to be disposed, it is very critical to call dispose() on any Disposables when you are done with them. If you do not do this, you will run into memory leak problems and the garbage collector will not be able to free those resources.
+#### takeUntil()
+Using line
+```java
+    JavaFxObservable.actionEventsOf(unsubscribeButton).subscribe(next -> disposable.dispose());
+```
+we called dispose() method to cancel a subscription to our Observable. But we can also unsubscribe in more reactive way.
+		Button button = new Button("+");
+		Label label = new Label();
+		Button unsubscribeButton = new Button("Unsubscribe!");
+		HBox hBox = new HBox(button, label, unsubscribeButton);
+		stage.setScene(new Scene(hBox));
+		stage.show();
+```java
+Observable<ActionEvent> unsubscribeButtonActionObservable = JavaFxObservable.actionEventsOf(unsubscribeButton).take(1);
+Observable<ActionEvent> incrementButtonActionObservable = JavaFxObservable.actionEventsOf(button).takeUntil(unsubscribeButtonActionObservable);
+
+incrementButtonActionObservable
+.map(actionEvent -> 1)
+.scan(0, (current, next) -> current + next)
+.map(String::valueOf)
+.subscribe(
+		label::setText,
+		Throwable::printStackTrace,
+		() -> System.out.println("completed!"));
+```
+Example017
+Notice that this time onComplete() method was called.
+### Events and value changes
+In the previous section, we got a brief introduction to handling events reactively. But RxJavaFX is equipped to handle almost any event type for various Node controls. JavaFX also utilizes the ObservableValue, and its value changes can be turned into Observables as well.
+To create an Observable for any event on any Node , you can target the Node 's events using a JavaFxObservable.eventsOf(). You can pass the EventType you are targeting as a parameter, and an Observable emitting that EventType will be returned.
+Here is an example with a ListView containing String items representing the integers 0 through 9. Whenever a numeric key is pressed on your keyboard, it will select that item in the ListView.
+```java
+ListView<String> listView = new ListView<>(FXCollections.observableArrayList(IntStream.range(0, 10).boxed().map(String::valueOf).collect(Collectors.toList())));
+Scene scene = new Scene(listView);
+stage.setScene(scene);
+stage.show();
+
+listView.requestFocus();
+
+JavaFxObservable.eventsOf(listView, KeyEvent.KEY_TYPED)
+.map(KeyEvent::getCharacter)
+.filter(character -> character.matches("[0-9]"))
+.subscribe(listView.getSelectionModel()::select);
+```
+Example018
+Task005
+Write an app which prints x and y coordinates of mouse clicked to appropriate labels.
+### ObservableValue changes
+Up to this point we only have worked with events. There is some metadata on event emissions that can be useful, but we are not quite working with data in the traditional sense.
+JavaFX has many implementations of its ObservableValue<T> type. This is essentially a wrapper around a mutable value of a type T , and it notifies any listeners when the value changes. This provides a perfect opportunity to hook a listener onto it and make a reactive stream of value changes.
+Let's create a simple ComboBox and hoop up to it's value property.
+```java
+	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+	StackPane stackPane = new StackPane(comboBox);
+	Scene scene = new Scene(stackPane, 400, 400);
+	stage.setScene(scene);
+	stage.show();
+	JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
+```
+Example019
+Every selection change should produce output in a from of new value printed to console.
+Let's modify our example a little and selected some value before running our subscription mechanism.
+```java
+	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+	StackPane stackPane = new StackPane(comboBox);
+	Scene scene = new Scene(stackPane, 400, 400);
+	stage.setScene(scene);
+	stage.show();
+	comboBox.setValue("Gamma");
+	JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
+```
+Example020
+After running the app the output is:
+
+    Gamma
+Rx emmited current value as a first thing after the subscription started.
+Notice that the Example019 Rx did not push the initial null value. This is because RxJava 2 does not emit null values. However, you can use nullableValuesOf() to get the null values wrapped within Optional object.
+```java
+	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+	StackPane stackPane = new StackPane(comboBox);
+	Scene scene = new Scene(stackPane, 400, 400);
+	stage.setScene(scene);
+	stage.show();
+	JavaFxObservable.nullableValuesOf(comboBox.valueProperty()).subscribe(optional -> System.out.println(optional.orElse("N/A")));
+```
+Task006
+Let's get a little bit creative. Sum every selected value length and show it to the user in the label.
+This example may be a bit contrived, but hopefully you are starting to see some of the possibilities when you have a chain of operators "reacting" to a change in a ComboBox . Pushing each value every time it is selected in a ComboBox allows you to quickly tell other parts of the UI to update accordingly.
+Again, you can use this factory on any ObservableValue . This means you can hook into any JavaFX component property and track its changes reactively. The possibilities are quite vast.
+#### cahangesOf()
+You also have the option of pushing the old and new value in a Change item through the changesOf() factory. This can be helpful for validation, and you can restore that old value back into the control if the new value fails to meet a condition.
+```java
+	TextField textField = new TextField();
+	Scene scene = new Scene(textField);
+	stage.setScene(scene);
+	stage.show();
+	JavaFxObservable.changesOf(textField.textProperty())
+	.map(change -> change.getNewVal().matches("[0-9]+") ? change.getNewVal() : change.getOldVal())
+	.subscribe(textField::setText);
+```
+Example022
+### Collections and data
+Any sizable application needs to work with data and collections of items. One of the greatest utilities to come out of JavaFX are ObservableCollections such as ObservableList , ObservableSet, and ObservableMap . These implementations of List , Set , and Map are built specifically for JavaFX to notify the UI when it has been modified, and any control built off it will visually update accordingly.
+However, these ObservableCollections can have custom listeners added to them. This creates an opportunity to reactively work with data through collections. The idea of emitting a collection every time it changes allows some surprisingly useful reactive transformations, and we will see plenty of examples in this section.
+####emitOnChanged()
+Let's create a simple application backed by an ObservableList of Strings. There will be a ListView\<String> to display these values, and another ListView\<Integer> that will hold their lengths. We will use a TextField and a Button to add Strings to the ObservableList , and both ListViews should update accordingly with each addition.
+```java
+	ListView<String> listView = new ListView<>();
+	ListView<Integer> lenghtsListView = new ListView<>();
+	HBox hBox = new HBox(listView, lenghtsListView);
+	TextField textField = new TextField();
+	Button button = new Button("Add");
+	HBox hBox2 = new HBox(textField, button);
+	VBox vBox = new VBox(hBox, hBox2);
+	Scene scene = new Scene(vBox);
+	stage.setScene(scene);
+	stage.show();
+	
+	JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(listView.getItems()::add);
+	
+	JavaFxObservable.emitOnChanged(listView.getItems())
+	.flatMapSingle(items -> Observable.fromIterable(items).map(String::length).toList())
+	.subscribe(lenghtsListView.getItems()::setAll);
+```
+Example023
+Go ahead, type in "Detla", click Add button, type in "Beta", click Add button. As the list of items was changed twice there were two emissions already. Let's focus on the latter. The emisson contains all items that currently are held in the String ListView. Inside flatMapSingle() we transform it Observable.fromIterable() which creates a finite (cold) Observable. Values "Delta" and "Beta" are emitted, mapped to its lenghts and grouped toList(). After that the Observable is done(), we can say it's onSucccess() method was call and it emitted list of lengths as its single and final emission.
+What we have really done it this example is combining the features of hot and Observables to achive desired behaviour.
+Task007
+Modify the previous example to show in the ListView\<Integer> only distinct lenghts in the ascending order.
+### Add, remove, ad update events
+There are factories for ObservableList , ObservableSet , and ObservableMap to emit specific change events against those collections.
+#### additionsOf()
+```java
+ObservableList<String> numbers = FXCollections.observableArrayList();
+JavaFxObservable.additionsOf(numbers)
+.subscribe(System.out::println);
+numbers.add("one");
+numbers.addAll("two", "three");
+```	
+Example024
+Produces output:
+
+    one
+    two
+    three
+Note that this factory has no initial emission. It will only emit additions going forward after subscription. The idea of removalsOf() is pretty the same.
+#### updatesOf()
+An UPDATED emission occurs when an ObservableValue property of a T
+item in an ObservableList\<T> changes. Consider a User class with an
+updateable Property called name.
+```java
+    class User {
+    	private final StringProperty nameProperty = new SimpleStringProperty();
+    
+    	public User(String name) {
+    		nameProperty.set(name);
+    	}
+    	public void setName(String name) {
+    		nameProperty.set(name);
+    	}
+    	public StringProperty nameProperty() {
+    		return nameProperty;
+    	}
+    	@Override
+    	public String toString() {
+    		return "User[name=" + nameProperty.get() + "]";
+    	}
+    }
+```
+```java
+	User john = new User("John");
+	User lucy = new User("Lucy");
+
+	ObservableList<User> users = FXCollections.observableArrayList(user -> new ObservableValue[] {user.nameProperty()});
+	users.addAll(john, lucy);
+
+	JavaFxObservable.updatesOf(users).subscribe(System.out::println);
+
+	john.setName("Johnny");
+	lucy.setName("Lucinda");
+```
+Exmaple025
+Produces output:
+
+    User[name=Johnny]
+    User[name=Lucinda]
+Whenever this name property for any User changes, this change will be
+pushed as an emission.
