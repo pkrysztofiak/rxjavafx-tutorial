@@ -651,9 +651,7 @@ Produces output:
     three
 Note that this factory has no initial emission. It will only emit additions going forward after subscription. The idea of removalsOf() is pretty the same.
 #### updatesOf()
-An UPDATED emission occurs when an ObservableValue property of a T
-item in an ObservableList\<T> changes. Consider a User class with an
-updateable Property called name.
+An UPDATED emission occurs when an ObservableValue property of a T item in an ObservableList\<T> changes. Consider a User class with an updateable Property called name.
 ```java
     class User {
     	private final StringProperty nameProperty = new SimpleStringProperty();
@@ -692,3 +690,165 @@ Produces output:
     User[name=Lucinda]
 Whenever this name property for any User changes, this change will be
 pushed as an emission.
+## Combining Observables
+There are several ways to combine emissions from multiple Observables, and we will cover many of these combine operators.
+#### concat()
+One of the simplest ways to combine Observables is to use the concat() operators. You can specify two or more Observables emitting the same type T and it will fire emissions from each one in order.
+```java
+Observable<String> source1 = Observable.just("one", "two");
+Observable<String> source2 = Observable.just("three", "four", "five");
+
+Observable.concat(source1, source2)
+.map(String::length)
+.toList()
+.subscribe(System.out::println);
+```
+Example026
+Produces output:
+
+    [3, 3, 5, 4, 4]
+It is very critical to note that onComplete() must be called by each Observable so it moves on to the next one. If you have an infinite Observable in a concatenated operation, it will hold up the line by infinitely emitting items, forever keeping any Observables after it from getting fired. Concatentation is also available as an operator and not just a factory, and it should yield the same output.
+```java
+Observable<String> source1 = Observable.just("one", "two");
+Observable<String> source2 = Observable.just("three", "four", "five");
+
+source1.concatWith(source2)
+.map(String::length)
+.toList()
+.subscribe(System.out::println);
+```
+Example027
+Produces output:
+
+    [3, 3, 5, 4, 4]
+#### startWith()
+If you want to do a concenation but put another Observable in front rather than after, you can use startWith() instead.
+```java
+Observable<String> source1 = Observable.just("one", "two");
+Observable<String> source2 = Observable.just("three", "four", "five");
+
+source2.startWith(source1)
+.map(String::length)
+.toList()
+.subscribe(System.out::println);
+```
+Example028
+Produces output:
+
+    [3, 3, 5, 4, 4]
+But we can also use startWith() to force the first emssion without latter Observable involved.
+```java
+	Observable<String> source1 = Observable.just("two", "three");
+
+	source1.startWith("one")
+	.map(String::length)
+	.toList()
+	.subscribe(System.out::println);
+```
+Example029
+#### merge()
+Merging is almost like concatenation but with one important difference: it will combine all Observables of a given emission type T simultaneously. This means all emissions from all Observables are merged together at once into a single stream without any regard for order or completion.
+Task008
+Create app with label, decrement button and increment button. Every decrement button click should decrement the label value, same but in opposite direction with increment button. Use merge() and predefined observables.
+#### combineLatest()
+Pushes first emission when every of combined Observables sent an initial emission. After that pushes on any of Observables pushed new emission so it always reflects the contents of every Observable combined.
+Task009
+Create app with label showing current position of stage (x, y, width, height). Use combineLatest() and predefined Observables.
+#### withLatestFrom()
+Is an operator counterpart of combineLatest() factory.
+
+    observable1.withLatestFrom(observable2)
+
+is triggerd only by observable1 emission reflecting the state of both.
+Task010
+Write an app which reflects state of delta (x, y) between mouse pressed an mouse dragged showing it in the label combined of xLabel, yLabel. On mouse released labels should be cleared.
+## Concurrency
+#### subscribeOn()
+By default, for a given Observable chain, the thread that calls the subscribe() method is the thread the Observable sends emissions on. For instance, a simple subscription to an Observable inside a main() method will fire the emissions on the main daemon thread.
+```java
+Observable.just("one", "two", "three")
+.subscribe(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next));
+```
+Example030
+Produces output:
+
+    [main] next=one
+    [main] next=two
+    [main] next=three
+However, we can easily switch these emissions to happen on another thread using subscribeOn() . We can pass a Scheduler as an argument, which specifies where it gets a thread from. In this case we can pass subscribeOn() an argument of Schedulers.newThread() , so it will execute on a new thread for each Observer.
+```java
+Observable.just("one", "two", "three")
+.subscribeOn(Schedulers.newThread())
+.subscribe(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next));
+TimeUnit.SECONDS.sleep(1);
+```	
+Example031
+Produces output:
+
+    [RxNewThreadScheduler-1] next=one
+    [RxNewThreadScheduler-1] next=two
+    [RxNewThreadScheduler-1] next=three
+This way we can declare our Observable chain and an Observer , but then immediately move on without waiting for the emissions to finish. Those are now happening on a new thread named RxNewThreadScheduler-1 . Notice too we have to call TimUnit.SECONDS.sleep(3) afterwards to make the main thread sleep for 3 seconds. This gives our Observable a chance to fire all emissions before the program exits.
+A critical behavior to note here is that all emissions are happening sequentially on a single RxNewThreadScheduler-1 thread. Emissions are strictly happening one-at-a-time on a single thread. There is no parallelization or racing to call onNext() throughout the chain. If this did occur, it would break the Observable contract.
+subscribeOn() can be declared anywhere in the Observable chain, and it will communicate all the way up to the source what thread to fire emissions on. If you pointlessly declare multiple subscribeOn() operators in a chain, the leftmost one (closest to the source) will win.
+In reality, you should be conservative about using Schedulers.newThread() as it creates a new thread for each Observer. You will notice that if we attach multiple Observers to this Observable, we are going to create a new thread for each Observer.
+```java
+Observable<String> sourceObservable = Observable.just("one", "two", "three", "four", "five")
+.subscribeOn(Schedulers.newThread());
+sourceObservable.subscribe(next -> System.out.println("Obserer1 [" + Thread.currentThread().getName() + "] next=" + next));
+sourceObservable.subscribe(next -> System.out.println("Obserer2 [" + Thread.currentThread().getName() + "] next=" + next));
+TimeUnit.SECONDS.sleep(2);
+```
+Example032
+Produces output:
+
+    Obserer1 [RxNewThreadScheduler-1] next=one
+    Obserer2 [RxNewThreadScheduler-2] next=one
+    Obserer2 [RxNewThreadScheduler-2] next=two
+    Obserer1 [RxNewThreadScheduler-1] next=two
+    Obserer2 [RxNewThreadScheduler-2] next=three
+    Obserer1 [RxNewThreadScheduler-1] next=three
+    Obserer2 [RxNewThreadScheduler-2] next=four
+    Obserer1 [RxNewThreadScheduler-1] next=four
+    Obserer2 [RxNewThreadScheduler-2] next=five
+    Obserer1 [RxNewThreadScheduler-1] next=five
+or output:
+
+    Obserer1 [RxNewThreadScheduler-1] next=one
+    Obserer1 [RxNewThreadScheduler-1] next=two
+    Obserer2 [RxNewThreadScheduler-2] next=one
+    Obserer1 [RxNewThreadScheduler-1] next=three
+    Obserer2 [RxNewThreadScheduler-2] next=two
+    Obserer1 [RxNewThreadScheduler-1] next=four
+    Obserer2 [RxNewThreadScheduler-2] next=three
+    Obserer1 [RxNewThreadScheduler-1] next=five
+    Obserer2 [RxNewThreadScheduler-2] next=four
+    Obserer2 [RxNewThreadScheduler-2] next=five   
+or many more, depends on how thread interleaves
+Now we have two threads, RxNewThreadScheduler-1 and RxNewThreadScheduler-2 . What if we had 100, or even 1000 Observers? This can easily happen if you are flatMapping to hundreds or thousands of Observables each with their own subscribeOn(Schedulers.newThread()) . Threads are very expensive and can tax your machine, so we want to constrain the number of threads that can be used at a time.
+The most effective way to keep thread creation under control is to "reuse" threads. You can do this with the different Schedulers . A Scheduler is RxJava's equivalent to Java's standard Executor. You can create your own Scheduler by passing an Executor to the Schedulers.from() factory. But for most cases, it is better to use RxJava's standard Schedulers as they are optimized to be conservative and efficient for most cases.
+#### Computation
+If you are doing computation-intensive operations, you will likely want to use Schedulers.computation().
+#### IO
+If you are doing a lot of IO-related tasks, like sending web requests or database queries, these are much less taxing on the CPU and threads can be created more liberally. Schedulers.io() is suited for this kind of work.
+#### Single
+Single Thread Executor
+#### JavaFX Scheduler
+Finally, the JavaFxScheduler is packaged with the RxJavaFX library. It executes the emissions on the JavaFX thread so they can safely make modifications to a UI.
+All RxJavaFX factories already emit on the JavaFxScheduler . Therefore, declaring a subscribeOn() against these sources will have no affect.
+### Intervals
+While we are talking about concurrency, it is worth mentioning there are other factories that already emit on a specific Scheduler . For instance, there are factories in both RxJava and RxJavaFX to emit at a specified time interval.
+In RxJava, there is an Observable.interval() that will emit a consecutive Long at every specified time interval. By default, this runs on the Schedulers.computation() unless you specify a different one as a third argument.
+Here is an application that will increment a Label every second.
+```java
+Label label = new Label();
+StackPane hBox = new StackPane(label);
+Scene scene = new Scene(hBox, 100, 100);
+stage.setScene(scene);
+stage.show();
+Observable.interval(1, TimeUnit.SECONDS, JavaFxScheduler.platform()).map(String::valueOf).subscribe(label::setText);
+```	
+Example033
+### observeOn()
+A lot of people get confused by the difference between subscribeOn() and observeOn(), but the distinction is quite simple. A subsribeOn() instructs the source Observable what thread to emit  items on. However, the observeOn() switches emissions to a different thread at that point in the chain.
+In JavaFX, the most common useage of observeOn() is to put items back on the JavaFX thread after a compution or IO operation finishes from another thread. Say you wanted to import some expensive data on Schedulers.io() and collect it in a List . Once it is ready, you want to move that List emission to the JavaFX thread to feed a ListView . That is perfectly doable with an observeOn().
