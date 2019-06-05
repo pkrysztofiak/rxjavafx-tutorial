@@ -1,14 +1,16 @@
-package com.github.pkrysztofiak.rxjavafxtutorial.tasks;
+package com.github.pkrysztofiak.rxjavafxtutorial.solutions;
 
+import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class Task005 extends Application {
+public class Solution005 extends Application {
 	private final Label xLabel = new Label();
 	private final Label yLabel = new Label();
 	private final HBox hBox = new HBox(new Label("x="), xLabel, new Label(", y="), yLabel);
@@ -30,6 +32,7 @@ public class Task005 extends Application {
 		stage.setScene(scene);
 		stage.show();
 
-		//your code here
+		JavaFxObservable.eventsOf(stackPane, MouseEvent.MOUSE_CLICKED).map(MouseEvent::getX).map(String::valueOf).subscribe(xLabel::setText);
+		JavaFxObservable.eventsOf(stackPane, MouseEvent.MOUSE_CLICKED).map(MouseEvent::getX).map(String::valueOf).subscribe(yLabel::setText);
 	}
 }
