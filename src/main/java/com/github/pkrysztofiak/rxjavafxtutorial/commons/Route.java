@@ -5,19 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Route {
+	private final List<Client> clients = new ArrayList<>();
 
-	private final List<Address> addresses = new ArrayList<>();
-
-	public Route(Address... addresses) {
-		this.addresses.addAll(Arrays.asList(addresses));
+	public Route(Client... clients) {
+		this.clients.addAll(Arrays.asList(clients));
 	}
-
-	public List<Address> getAddresses() {
-		return addresses;
-	}
-
-	@Override
-	public String toString() {
-		return "Route" + addresses + "]";
+	public List<Client> getClients() {
+		return clients;
 	}
 }
