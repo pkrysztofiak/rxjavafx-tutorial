@@ -371,6 +371,65 @@ Produces output:
     6
     2
     11
+
+#### Tasks
+Let's say we run a company with clients spread around the Poland. Our reps visit clients and sell them our product. Every trip made by the rep is logged as route.
+```java
+public class Client {
+	private final String name;
+	private final String city;
+	private final int itemsSold;
+
+	public Client(String name, String city, int itemsSold) {
+		this.name = name;
+		this.city = city;
+		this.itemsSold = itemsSold;
+	}
+	public String getName() {
+		return name;
+	}
+	public String getCity() {
+		return city;
+	}
+	public int getItemsSold() {
+		return itemsSold;
+	}
+}
+public class Route {
+	private final List<Client> clients = new ArrayList<>();
+
+	public Route(Client... clients) {
+		this.clients.addAll(Arrays.asList(clients));
+	}
+	public List<Client> getClients() {
+		return clients;
+	}
+}    
+```
+Task1
+Having last two routes of company representative, print the number of different cities he/she visited.
+Expected output:
+
+    4
+Task2
+Having last two routes of company representative, print subsequent cities he/she visited. Each route should start with "\==route==" line.
+Expected output:
+
+    ==route==
+    Lodz
+    Warsaw
+    Poznan
+    ==route==
+    Lodz
+    Poznan
+    Gdansk
+    Poznan
+Task3
+Having last two routes of company representative, print the total number of items sold for each route.
+Expected output:
+
+    215
+    240
 ### Events Observable    
 So far we just pushed data out of Observables. But did you know you can push events too? As stated earlier, data and events are basically the same thing in RxJava. Let's take a simple JavaFX Application with a single Button.
 ```java
@@ -388,7 +447,7 @@ button.setOnAction(actionEvent -> {
 Example019
 On every button click produces output:
 
-javafx.event.ActionEvent@2a2e1055
-javafx.event.ActionEvent@2a2e1055
+    javafx.event.ActionEvent@2a2e1055
+    javafx.event.ActionEvent@2a2e1055
+As you can see the event object is the same.
 
-Events we using the actionEvent we handle is the same object.
