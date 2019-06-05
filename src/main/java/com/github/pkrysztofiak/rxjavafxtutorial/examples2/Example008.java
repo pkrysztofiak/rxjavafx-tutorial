@@ -5,7 +5,6 @@ import io.reactivex.Observable;
 public class Example008 {
 
 	public static void main(String[] args) {
-		System.out.println("Observable");
 		Observable.just("one", "two", "three", "four", "five")
 		.take(3)
 		.subscribe(
