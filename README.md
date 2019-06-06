@@ -44,7 +44,7 @@ Lets get one with some examples.
 
     Observable<Integer> emissionsSource = Observable.just(1, 2, 3, 4, 5);
 	emissionsSource.subscribe(number -> System.out.println("number=" + number));
-Example001
+[Example001](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example001.java)
 
 Produces an output:
 
@@ -70,7 +70,7 @@ lettersObservable
 .map(letter -> letter.length())
 .subscribe(length -> System.out.println("length=" + length));
 ```
-Example002
+[Example002](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example002.java)
 
 Produces output:
 
@@ -89,7 +89,7 @@ numbersObservable
 .map(String::length)
 .subscribe(length -> System.out.println("length=" + length));
 ```
-Example003
+[Example003](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example003.java)
 
 Produces output:
 
@@ -108,7 +108,7 @@ Observable.just("one", "two", "three", "four", "five")
 .filter(next -> next.length() > 3)
 .subscribe(next -> System.out.println("next=" + next));
 ```
-Example004
+[Example004](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example004.java)
 
 Produces output:
 
@@ -125,7 +125,7 @@ Observable.just("one", "two", "three", "four", "five")
 .distinct()
 .subscribe(System.out::println);
 ```
-Example005
+[Example005](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example005.java)
 
 Produces output:
 
@@ -138,7 +138,7 @@ Observable.just("one", "two", "three", "four", "five")
 .distinct(String::length)
 .subscribe(System.out::println);
 ```
-Example006
+[Example006](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example006.java)
 
 Produces output:
 
@@ -152,7 +152,7 @@ Observable.just("one", "one", "two", "one", "seven", "eight", "eight", "nine")
 .distinctUntilChanged()
 .subscribe(System.out::println);
 ```
-Example007
+[Example007](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example007.java)
 
 Produces output:
 
@@ -173,7 +173,7 @@ Observable.just("one", "two", "three", "four", "five")
 		() -> System.out.println("completed!")		//onComplete
 		);
 ```
-Example008
+[Example008](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example008.java)
 
 Produces output:
 
@@ -192,7 +192,7 @@ Observable.just("one", "two", "three", "four", "five")
 		() -> System.out.println("completed!")		//onComplete
 		);
 ```
-Example009
+[Example009](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example009.java)
 
 Produces output:
 
@@ -210,7 +210,7 @@ Observable.just("one", "two", "three", "four", "five")
 		() -> System.out.println("completed!")		//onComplete
 		);
 ```
-Example010
+[Example010](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example010.java)
 
 Produces output:
 
@@ -230,7 +230,7 @@ Observable.just("one", "two", "three", "four", "five")
 		throwable -> throwable.printStackTrace()			//onError
 		);
 ```
-Example011
+[Example011](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example011.java)
 
 Produces output:
 
@@ -248,7 +248,7 @@ Observable.just("one", "two", "three", "four", "five")
 		throwable -> throwable.printStackTrace()		//onError
 		);
 ```
-Example012
+[Example012](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example012.java)
 
 Produces output:
 
@@ -275,7 +275,7 @@ Observable.just("one", "two", "three")
 	}
 });
 ```
-Example013
+[Example013](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example013.java)
 
 Produces output:
 
@@ -305,7 +305,7 @@ Observable.just("one", "two", "three")
 	}
 });
 ```
-Example014
+[Example014](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example014.java)
 
 Produces output:
 
@@ -336,7 +336,7 @@ Observable.<String>empty()
 	}
 });
 ```
-Example015
+[Example015](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example015.java)
 
 Produces output:
 
@@ -349,7 +349,7 @@ Observable.just("one", "two", "three")
 .scan(0, (current, next) -> current + next)
 .subscribe(System.out::println);
 ```
-Example016
+[Example016](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example016.java)
 
 Produces output:
 
@@ -367,7 +367,7 @@ Observable.just("1;2;3", "1;1", "4;4;1;2")
 .reduce((current, next) -> current + next)
 .subscribe(System.out::println);
 ```
-Example017
+[Example017](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example017.java)
 
 Produces output:
 
@@ -382,7 +382,7 @@ Observable.just("1;2;3", "1;1", "4;4;1;2")
 	.reduce(0, (current, next) -> current + next))
 .subscribe(System.out::println);
 ```
-Example018
+[Example018](https://github.com/pkrysztofiak/rxjavafx-tutorial/blob/master/src/main/java/com/github/pkrysztofiak/rxjavafxtutorial/examples/Example018.java)
 
 Produces output:
 
@@ -715,7 +715,10 @@ An UPDATED emission occurs when an ObservableValue property of a T item in an Ob
 	john.setName("Johnny");
 	lucy.setName("Lucinda");
 ```
-Example030
+Example03
+
+
+
 
 Produces output:
 
@@ -799,6 +802,77 @@ Is an operator counterpart of combineLatest() factory.
 is triggerd only by observable1 emission reflecting the state of both.
 Task010
 Write an app which reflects state of delta (x, y) between mouse pressed an mouse dragged showing it in the label combined of xLabel, yLabel. On mouse released labels should be cleared.
+### switchMap()
+The switchMap() works identically to any variant of flatMap() , but it will only chase after the last Observable emissions.
+Let's have an employee class
+```java
+    public class Employee {
+    	private final StringProperty nameProperty = new SimpleStringProperty();
+    	private final Observable<String> nameObservable = JavaFxObservable.valuesOf(nameProperty);
+    
+    	public Employee(String name) {
+    		nameProperty.set(name);
+    	}
+    	public String getName() {
+			return nameProperty.get();
+		}
+    	public void setName(String name) {
+    		nameProperty.set(name);
+    	}
+    	public Observable<String> nameObservable() {
+    		return nameObservable;
+    	}
+    }
+```
+Let's create list of three employees and flatMap to their nameProperty.
+```java
+	Employee john = new Employee("John");
+	Employee emily = new Employee("Emily");
+	Employee alastair = new Employee("Alastair");
+
+	Observable.just(john, emily, alastair)
+	.flatMap(employee -> employee.nameObservable())
+	.subscribe(System.out::println);
+
+	john.setName("Johnny");
+	emily.setName("Em");
+	alastair.setName("Al");
+```
+Example035
+
+Produces output:
+
+    John
+    Emily
+    Alastair
+    Johnny
+    Em
+    Al
+As you can see every Observable we created with the flatMap is stil alive and produces emissions.
+```java
+Employee john = new Employee("John");
+Employee emily = new Employee("Emily");
+Employee alastair = new Employee("Alastair");
+
+Observable.just(john, emily, alastair)
+.switchMap(employee -> employee.nameObservable())
+.subscribe(System.out::println);
+
+john.setName("Johnny");
+emily.setName("Em");
+alastair.setName("Al");
+
+john.setName("Johnny the First");
+emily.setName("Em the Greatest");
+alastair.setName("Al the Looser");
+```
+Example036
+
+As you can see only the last Observable produces emissions.
+Task011
+
+Write circle dragger app.
+
 ## Concurrency
 #### subscribeOn()
 By default, for a given Observable chain, the thread that calls the subscribe() method is the thread the Observable sends emissions on. For instance, a simple subscription to an Observable inside a main() method will fire the emissions on the main daemon thread.
@@ -806,7 +880,7 @@ By default, for a given Observable chain, the thread that calls the subscribe() 
 Observable.just("one", "two", "three")
 .subscribe(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next));
 ```
-Example035
+Example050
 
 Produces output:
 
@@ -820,7 +894,7 @@ Observable.just("one", "two", "three")
 .subscribe(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next));
 TimeUnit.SECONDS.sleep(1);
 ```	
-Example036
+Example051
 
 Produces output:
 
@@ -838,7 +912,7 @@ sourceObservable.subscribe(next -> System.out.println("Obserer1 [" + Thread.curr
 sourceObservable.subscribe(next -> System.out.println("Obserer2 [" + Thread.currentThread().getName() + "] next=" + next));
 TimeUnit.SECONDS.sleep(2);
 ```
-Example037
+Example052
 
 Produces output:
 
@@ -888,7 +962,7 @@ stage.setScene(scene);
 stage.show();
 Observable.interval(1, TimeUnit.SECONDS, JavaFxScheduler.platform()).map(String::valueOf).subscribe(label::setText);
 ```	
-Example038
+Example053
 
 ### observeOn()
 A lot of people get confused by the difference between subscribeOn() and observeOn(), but the distinction is quite simple. A subsribeOn() instructs the source Observable what thread to emit  items on. However, the observeOn() switches emissions to a different thread at that point in the chain.
