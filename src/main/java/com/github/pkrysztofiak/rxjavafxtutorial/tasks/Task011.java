@@ -11,7 +11,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
-public class Task11 extends Application {
+public class Task011 extends Application {
 
 	private final CircleVertex circleVertex = new CircleVertex();
 	private final Pane pane = new Pane(circleVertex);
