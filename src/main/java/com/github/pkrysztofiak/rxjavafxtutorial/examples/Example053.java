@@ -10,7 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-public class Example038 extends Application {
+public class Example053 extends Application {
 
 
 	public static void main(String[] args) {

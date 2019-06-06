@@ -2,7 +2,7 @@ package com.github.pkrysztofiak.rxjavafxtutorial.examples;
 
 import io.reactivex.Observable;
 
-public class Example035 {
+public class Example050 {
 
 	public static void main(String[] args) {
 		Observable.just("one", "two", "three")

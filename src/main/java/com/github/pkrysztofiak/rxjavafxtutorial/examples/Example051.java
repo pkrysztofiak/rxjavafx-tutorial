@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 
-public class Example036 {
+public class Example051 {
 
 	public static void main(String[] args) throws InterruptedException {
 		Observable.just("one", "two", "three")
