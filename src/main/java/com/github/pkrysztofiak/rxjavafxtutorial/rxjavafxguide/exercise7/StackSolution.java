@@ -22,9 +22,9 @@ public class StackSolution extends Application {
 
 
 		ObservableList<Employee> employees = FXCollections.observableArrayList(
-				new Employee("David", "Seaman"),
-				new Employee("Gary", "Neville"),
-				new Employee("Tony", "Adams")
+				new Employee("David", "Seaman", null),
+				new Employee("Gary", "Neville", null),
+				new Employee("Tony", "Adams", null)
 //				new Employee("Gareth", "Southgate"),
 //				new Employee("Stuart", "Pearce"),
 //				new Employee("Steve", "McManaman"),

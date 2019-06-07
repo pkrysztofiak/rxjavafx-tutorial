@@ -15,7 +15,7 @@ public class ChangesOfApp {
 //			System.out.println("change.old=" + change.getNewVal());
 //		});
 
-		employeeProperty.set(new Employee("Jack", "Bowler"));
+		employeeProperty.set(new Employee("Jack", "Bowler", null));
 		employeeProperty.set(null);
 
 	}

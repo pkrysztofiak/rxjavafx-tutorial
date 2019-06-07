@@ -20,7 +20,6 @@ public class EmployeeListCell extends ListCell<Employee> {
 	}
 
 	private void onItemChanged(Employee item) {
-		label.setText(item.getSurename());
 //		listCellView.setEmployee(item);
 	}
 

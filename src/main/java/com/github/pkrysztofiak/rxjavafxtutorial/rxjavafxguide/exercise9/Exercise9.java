@@ -26,7 +26,7 @@ public class Exercise9 extends Application {
 		ObservableList<Employee> employees = FXCollections.observableArrayList();
 
 		for (int i = 0; i < 40; i++) {
-			employees.add(new Employee("name" + String.valueOf(i) , "surname" + String.valueOf(i)));
+			employees.add(new Employee("name" + String.valueOf(i) , "surname" + String.valueOf(i), null));
 		}
 
 		ListView<Employee> listView = new ListView<>(employees);
@@ -37,7 +37,7 @@ public class Exercise9 extends Application {
 		Button addButton = new Button("Add");
 		Button gcButton = new Button("GC");
 
-		JavaFxObservable.actionEventsOf(addButton).subscribe(addAction -> employees.add(new Employee("nameNew", "surnameNew")));
+		JavaFxObservable.actionEventsOf(addButton).subscribe(addAction -> employees.add(new Employee("nameNew", "surnameNew", null)));
 		JavaFxObservable.actionEventsOf(removeButton).subscribe(removeAction -> employees.remove(employees.size() - 1));
 		JavaFxObservable.actionEventsOf(gcButton).subscribe(gcAction -> System.gc());
 
