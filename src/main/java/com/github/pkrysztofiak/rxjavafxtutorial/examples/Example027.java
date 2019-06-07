@@ -19,7 +19,7 @@ public class Example027 extends Application {
 		stage.setScene(scene);
 		stage.show();
 		JavaFxObservable.changesOf(textField.textProperty())
-		.map(change -> change.getNewVal().matches("[0-9]+") ? change.getNewVal() : change.getOldVal())
+		.map(change -> change.getNewVal().matches("[0-9]*") ? change.getNewVal() : change.getOldVal())
 		.subscribe(textField::setText);
 	}
 }
