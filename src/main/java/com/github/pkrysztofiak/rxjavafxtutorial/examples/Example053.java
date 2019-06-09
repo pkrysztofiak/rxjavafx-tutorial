@@ -24,6 +24,6 @@ public class Example053 extends Application {
 		Scene scene = new Scene(hBox, 100, 100);
 		stage.setScene(scene);
 		stage.show();
-		Observable.interval(1, TimeUnit.SECONDS, JavaFxScheduler.platform()).map(String::valueOf).subscribe(label::setText);
+		Observable.interval(1, TimeUnit.SECONDS, JavaFxScheduler.platform()).map(next -> next + 1).map(String::valueOf).subscribe(label::setText);
 	}
 }

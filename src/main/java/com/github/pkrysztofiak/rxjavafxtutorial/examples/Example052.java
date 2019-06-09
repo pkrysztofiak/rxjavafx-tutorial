@@ -13,6 +13,5 @@ public class Example052 {
 		sourceObservable.subscribe(next -> System.out.println("Obserer1 [" + Thread.currentThread().getName() + "] next=" + next));
 		sourceObservable.subscribe(next -> System.out.println("Obserer2 [" + Thread.currentThread().getName() + "] next=" + next));
 		TimeUnit.SECONDS.sleep(2);
-
 	}
 }
