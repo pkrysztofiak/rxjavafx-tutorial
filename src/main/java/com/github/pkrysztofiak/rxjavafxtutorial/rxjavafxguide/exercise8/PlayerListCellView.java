@@ -17,7 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 
-public class EmployeeListCellView extends HBox {
+public class PlayerListCellView extends HBox {
 
 	private final Label surnameLabel = new Label();
 	private final Label nameLabel = new Label();
@@ -28,11 +28,11 @@ public class EmployeeListCellView extends HBox {
 
 	private final Observable<ActionEvent> removeActionObservable = JavaFxObservable.actionEventsOf(removeButton);
 
-	private final ObjectProperty<Employee> employeeProperty = new SimpleObjectProperty<>();
-	private final ObjectProperty<Optional<Employee>> employeeOptionalProperty = new SimpleObjectProperty<>();
+	private final ObjectProperty<Player> employeeProperty = new SimpleObjectProperty<>();
+	private final ObjectProperty<Optional<Player>> employeeOptionalProperty = new SimpleObjectProperty<>();
 
-	private final Observable<Optional<Employee>> employeeOptionalObservable = JavaFxObservable.nullableValuesOf(employeeProperty);
-	private final Observable<Change<Optional<Employee>>> employeeChangeObservable = JavaFxObservable.changesOf(employeeOptionalProperty);
+	private final Observable<Optional<Player>> employeeOptionalObservable = JavaFxObservable.nullableValuesOf(employeeProperty);
+	private final Observable<Change<Optional<Player>>> employeeChangeObservable = JavaFxObservable.changesOf(employeeOptionalProperty);
 
 	private final Behaviour behaviour = new Behaviour();
 
@@ -41,22 +41,22 @@ public class EmployeeListCellView extends HBox {
 		getChildren().setAll(surnameLabel, new Label(", "), nameLabel, placeholderPane, positionComboBox, removeButton);
 	}
 
-	public EmployeeListCellView() {
+	public PlayerListCellView() {
 		employeeOptionalObservable.subscribe(employeeOptionalProperty::set);
 		employeeChangeObservable.subscribe(behaviour::onEmployeeChanged);
 	}
 
-	public void setEmployee(Employee employee) {
-		employeeProperty.set(employee);
+	public void setEmployee(Player player) {
+		employeeProperty.set(player);
 	}
 
-	public Observable<Employee> employeeRemoveRequestObservable() {
+	public Observable<Player> employeeRemoveRequestObservable() {
 		return removeActionObservable.map(removeAction -> employeeProperty.get());
 	}
 
 	private class Behaviour {
 
-		private void onEmployeeChanged(Change<Optional<Employee>> change) {
+		private void onEmployeeChanged(Change<Optional<Player>> change) {
 			change.getOldVal().ifPresent(employee -> {
 				Bindings.unbindBidirectional(nameLabel.textProperty(), employee.nameProperty());
 				Bindings.unbindBidirectional(surnameLabel.textProperty(), employee.surnameProperty());

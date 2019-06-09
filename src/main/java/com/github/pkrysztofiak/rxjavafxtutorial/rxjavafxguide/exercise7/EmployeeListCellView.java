@@ -1,6 +1,6 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise7;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import io.reactivex.Observable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
@@ -17,8 +17,8 @@ import javafx.scene.layout.Priority;
 
 public class EmployeeListCellView extends HBox {
 
-	private final ObjectProperty<Employee> employeeProperty = new SimpleObjectProperty<>();
-	private final Observable<Change<Employee>> employeeChangeObservable = JavaFxObservable.changesOf(employeeProperty);
+	private final ObjectProperty<Player> employeeProperty = new SimpleObjectProperty<>();
+	private final Observable<Change<Player>> employeeChangeObservable = JavaFxObservable.changesOf(employeeProperty);
 
 	private final Label nameLabel = new Label();
 	private final Label surnameLabel = new Label();
@@ -36,12 +36,12 @@ public class EmployeeListCellView extends HBox {
 
 	public EmployeeListCellView() {
 		employeeChangeObservable.subscribe(change -> {
-			Employee oldValue = change.getOldVal();
+			Player oldValue = change.getOldVal();
 			if (oldValue != null) {
 				Bindings.unbindBidirectional(surnameLabel.textProperty(), oldValue.surnameProperty());
 			}
 
-			Employee newValue = change.getNewVal();
+			Player newValue = change.getNewVal();
 			if (newValue != null) {
 				Bindings.bindBidirectional(surnameLabel.textProperty(), newValue.surnameProperty());
 			}
@@ -51,20 +51,20 @@ public class EmployeeListCellView extends HBox {
 //		removeEmployeeObservable().subscribe(behaviour::onEmployeeRemoved);
 	}
 
-	public void setEmployee(Employee employee) {
-		System.out.println("setEmployee(" + employee.surnameProperty().get() + ")");
+	public void setEmployee(Player player) {
+		System.out.println("setEmployee(" + player.surnameProperty().get() + ")");
 //		surnameLabel.setText(employee.surnameProperty().get());
-		employeeProperty.set(employee);
+		employeeProperty.set(player);
 //		Bindings.bindBidirectional(surnameLabel.textProperty(), employee.surnameProperty());
 //		Bindings.bindBidirectional(nameLabel.textProperty(), employee.nameProperty());
 	}
 
-	private void onEmployeeChanged(Employee employee) {
-		Bindings.bindBidirectional(surnameLabel.textProperty(), employee.surnameProperty());
-		Bindings.bindBidirectional(nameLabel.textProperty(), employee.nameProperty());
+	private void onEmployeeChanged(Player player) {
+		Bindings.bindBidirectional(surnameLabel.textProperty(), player.surnameProperty());
+		Bindings.bindBidirectional(nameLabel.textProperty(), player.nameProperty());
 	}
 
-	public Observable<Employee> removeEmployeeObservable() {
+	public Observable<Player> removeEmployeeObservable() {
 		return removeButtonActionObservable.map(removeAction -> employeeProperty.get());
 	}
 

@@ -1,6 +1,6 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise9;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.application.Application;
@@ -23,13 +23,13 @@ public class Exercise9 extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 
-		ObservableList<Employee> employees = FXCollections.observableArrayList();
+		ObservableList<Player> players = FXCollections.observableArrayList();
 
 		for (int i = 0; i < 40; i++) {
-			employees.add(new Employee("name" + String.valueOf(i) , "surname" + String.valueOf(i), null));
+			players.add(new Player("name" + String.valueOf(i) , "surname" + String.valueOf(i), null));
 		}
 
-		ListView<Employee> listView = new ListView<>(employees);
+		ListView<Player> listView = new ListView<>(players);
 
 		listView.setCellFactory(lv -> new EmployeeListCell());
 
@@ -37,8 +37,8 @@ public class Exercise9 extends Application {
 		Button addButton = new Button("Add");
 		Button gcButton = new Button("GC");
 
-		JavaFxObservable.actionEventsOf(addButton).subscribe(addAction -> employees.add(new Employee("nameNew", "surnameNew", null)));
-		JavaFxObservable.actionEventsOf(removeButton).subscribe(removeAction -> employees.remove(employees.size() - 1));
+		JavaFxObservable.actionEventsOf(addButton).subscribe(addAction -> players.add(new Player("nameNew", "surnameNew", null)));
+		JavaFxObservable.actionEventsOf(removeButton).subscribe(removeAction -> players.remove(players.size() - 1));
 		JavaFxObservable.actionEventsOf(gcButton).subscribe(gcAction -> System.gc());
 
 		VBox vBox = new VBox(listView, new HBox(addButton, removeButton, gcButton));

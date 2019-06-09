@@ -1,17 +1,17 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise9;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import io.reactivex.Observable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 
-public class EmployeeListCell extends ListCell<Employee> {
+public class EmployeeListCell extends ListCell<Player> {
 
 	private final Label label = new Label();
 
-	private final Observable<Employee> itemObservable = JavaFxObservable.valuesOf(itemProperty());
+	private final Observable<Player> itemObservable = JavaFxObservable.valuesOf(itemProperty());
 	private final Observable<Boolean> emptyObservable = JavaFxObservable.valuesOf(emptyProperty());
 
 	public EmployeeListCell() {
@@ -19,7 +19,7 @@ public class EmployeeListCell extends ListCell<Employee> {
 		emptyObservable.subscribe(this::onEmptyChanged);
 	}
 
-	private void onItemChanged(Employee item) {
+	private void onItemChanged(Player item) {
 //		listCellView.setEmployee(item);
 	}
 

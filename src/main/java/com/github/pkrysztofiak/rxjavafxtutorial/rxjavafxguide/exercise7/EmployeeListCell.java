@@ -1,17 +1,17 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise7;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import io.reactivex.Observable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
 import javafx.scene.control.ListCell;
 
-public class EmployeeListCell extends ListCell<Employee> {
+public class EmployeeListCell extends ListCell<Player> {
 
 	private final EmployeeListCellView employeeListCellView = new EmployeeListCellView();
 
 	private final Observable<Boolean> emptyObservable = JavaFxObservable.valuesOf(emptyProperty());
-	private final Observable<Employee> itemObservable = JavaFxObservable.valuesOf(itemProperty());
+	private final Observable<Player> itemObservable = JavaFxObservable.valuesOf(itemProperty());
 
 	public EmployeeListCell() {
 		System.out.println("new EmployeeListCell() " + this);
@@ -19,14 +19,14 @@ public class EmployeeListCell extends ListCell<Employee> {
 //		emptyObservable.subscribe(this::onEmptyChanged);
 	}
 
-	private void onItemChanged(Employee employee) {
+	private void onItemChanged(Player player) {
 
-		System.out.println("onItemChanged employee=" + employee.surnameProperty().get() + " " + this);
-		employeeListCellView.setEmployee(employee);
+		System.out.println("onItemChanged employee=" + player.surnameProperty().get() + " " + this);
+		employeeListCellView.setEmployee(player);
 	}
 
 	@Override
-	protected void updateItem(Employee item, boolean empty) {
+	protected void updateItem(Player item, boolean empty) {
 		super.updateItem(item, empty);
 		if ((item == null) || empty) {
 			setGraphic(null);
@@ -39,7 +39,7 @@ public class EmployeeListCell extends ListCell<Employee> {
 		setGraphic(empty ? null : employeeListCellView);
 	}
 
-	public Observable<Employee> removeEmployeeObservable() {
+	public Observable<Player> removeEmployeeObservable() {
 		return employeeListCellView.removeEmployeeObservable();
 	}
 }

@@ -9,21 +9,21 @@ import javafx.stage.Stage;
 
 public class Exercise8 extends Application {
 
-	private final ObservableList<Employee> employees = FXCollections.observableArrayList(
-			new Employee("David", "Seaman", Position.G),
-			new Employee("Gary", "Neville", Position.CB),
-			new Employee("Tony", "Adams", Position.CB),
-			new Employee("Gareth", "Southgate", Position.LF),
-			new Employee("Stuart", "Pearce", Position.RF),
-			new Employee("Steve", "McManaman", Position.LMF),
-			new Employee("David", "Platt", Position.CMF),
-			new Employee("Paul", "Gascoigne", Position.CMF),
-			new Employee("Darren", "Anderton", Position.RMF),
-			new Employee("Alan", "Shearer", Position.CF),
-			new Employee("Teddy", "Sheringham", Position.CF));
+	private final ObservableList<Player> players = FXCollections.observableArrayList(
+			new Player("David", "Seaman", Position.G),
+			new Player("Gary", "Neville", Position.CB),
+			new Player("Tony", "Adams", Position.CB),
+			new Player("Gareth", "Southgate", Position.LF),
+			new Player("Stuart", "Pearce", Position.RF),
+			new Player("Steve", "McManaman", Position.LMF),
+			new Player("David", "Platt", Position.CMF),
+			new Player("Paul", "Gascoigne", Position.CMF),
+			new Player("Darren", "Anderton", Position.RMF),
+			new Player("Alan", "Shearer", Position.CF),
+			new Player("Teddy", "Sheringham", Position.CF));
 
-	private final ListView<Employee> employeesListView = new ListView<>(employees);
-	private final Scene scene = new Scene(employeesListView);
+	private final ListView<Player> playersListView = new ListView<>(players);
+	private final Scene scene = new Scene(playersListView);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -34,10 +34,10 @@ public class Exercise8 extends Application {
 		stage.setScene(scene);
 		stage.show();
 
-		employeesListView.setCellFactory(listView -> {
-			EmployeeListCell employeeListCell = new EmployeeListCell();
-			employeeListCell.employeeRemoveRequestObservable().subscribe(employees::remove);
-			return employeeListCell;
+		playersListView.setCellFactory(listView -> {
+			PlayerListCell playerListCell = new PlayerListCell();
+			playerListCell.employeeRemoveRequestObservable().subscribe(players::remove);
+			return playerListCell;
 		});
 	}
 }

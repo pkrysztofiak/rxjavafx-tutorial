@@ -1,6 +1,6 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise7;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -20,10 +20,10 @@ public class Exercise7 extends Application {
 	@Override
 	public void start(Stage stage) throws Exception {
 
-		ObservableList<Employee> employees = FXCollections.observableArrayList(
-				new Employee("David", "Seaman", null),
-				new Employee("Gary", "Neville", null),
-				new Employee("Tony", "Adams", null)
+		ObservableList<Player> players = FXCollections.observableArrayList(
+				new Player("David", "Seaman", null),
+				new Player("Gary", "Neville", null),
+				new Player("Tony", "Adams", null)
 //				new Employee("Gareth", "Southgate"),
 //				new Employee("Stuart", "Pearce"),
 //				new Employee("Steve", "McManaman"),
@@ -34,10 +34,10 @@ public class Exercise7 extends Application {
 //				new Employee("Teddy", "Sheringham")
 				);
 
-		ListView<Employee> employeesListView = new ListView<>(employees);
+		ListView<Player> employeesListView = new ListView<>(players);
 		employeesListView.setCellFactory(listView -> {
 			EmployeeListCellWorking employeeListCell = new EmployeeListCellWorking();
-			employeeListCell.removeEmployeeObservable().subscribe(employees::remove);
+			employeeListCell.removeEmployeeObservable().subscribe(players::remove);
 			return employeeListCell;
 		});
 
@@ -48,6 +48,6 @@ public class Exercise7 extends Application {
 		stage.setScene(new Scene(vBox));
 		stage.show();
 
-		button.setOnAction(action -> employees.remove(0));
+		button.setOnAction(action -> players.remove(0));
 	}
 }

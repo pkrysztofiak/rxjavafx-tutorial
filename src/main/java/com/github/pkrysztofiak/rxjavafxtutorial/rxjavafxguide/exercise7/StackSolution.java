@@ -1,6 +1,6 @@
 package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise7;
 
-import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Employee;
+import com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8.Player;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -21,10 +21,10 @@ public class StackSolution extends Application {
 	public void start(Stage stage) throws Exception {
 
 
-		ObservableList<Employee> employees = FXCollections.observableArrayList(
-				new Employee("David", "Seaman", null),
-				new Employee("Gary", "Neville", null),
-				new Employee("Tony", "Adams", null)
+		ObservableList<Player> players = FXCollections.observableArrayList(
+				new Player("David", "Seaman", null),
+				new Player("Gary", "Neville", null),
+				new Player("Tony", "Adams", null)
 //				new Employee("Gareth", "Southgate"),
 //				new Employee("Stuart", "Pearce"),
 //				new Employee("Steve", "McManaman"),
@@ -35,15 +35,15 @@ public class StackSolution extends Application {
 //				new Employee("Teddy", "Sheringham")
 				);
 
-		ListView<Employee> listView = new ListView<>(employees);
+		ListView<Player> listView = new ListView<>(players);
 		stage.setScene(new Scene(listView));
 		stage.show();
 
 		listView.setCellFactory(lv -> {
 			EmployeeListCellView cellRoot = new EmployeeListCellView();
-			cellRoot.removeEmployeeObservable().subscribe(employees::remove);
+			cellRoot.removeEmployeeObservable().subscribe(players::remove);
 		    // create nodes, register listeners on them, populate cellRoot, etc...
-		    ListCell<Employee> cell = new ListCell<>();
+		    ListCell<Player> cell = new ListCell<>();
 		    cell.itemProperty().addListener((obs, oldItem, newItem) -> {
 		        if (newItem != null) {
 		        	cellRoot.setEmployee(newItem);
