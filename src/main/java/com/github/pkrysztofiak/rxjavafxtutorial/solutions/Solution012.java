@@ -1,4 +1,5 @@
-package com.github.pkrysztofiak.rxjavafxtutorial.tasks;
+package com.github.pkrysztofiak.rxjavafxtutorial.solutions;
+
 
 import io.reactivex.Observable;
 import io.reactivex.rxjavafx.observables.JavaFxObservable;
@@ -11,7 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
-public class Task011 extends Application {
+public class Solution012 extends Application {
 
 	private final CircleVertex circleVertex = new CircleVertex();
 	private final Pane pane = new Pane(circleVertex);
@@ -53,6 +54,7 @@ class CircleVertex extends Group {
 	}
 
 	public CircleVertex() {
-		//your code here
+		mousePressedXObservable.switchMap(xPressed ->  Observable.combineLatest(translateXObservable.take(1), mouseDraggedXObservable, (xTranslate, xDragged) -> (xDragged - xPressed) + xTranslate)).subscribe(circle::setTranslateX);
+		mousePressedYObservable.switchMap(yPressed ->  Observable.combineLatest(translateYObservable.take(1), mouseDraggedYObservable, (yTranslate, yDragged) -> (yDragged - yPressed) + yTranslate)).subscribe(circle::setTranslateY);
 	}
 }

@@ -13,9 +13,9 @@ import javafx.stage.Stage;
 
 public class Solution010 extends Application {
 
-	private final Label xLabel = new Label();
-	private final Label yLabel = new Label();
-	private final HBox hBox = new HBox(new Label("x="), xLabel, new Label(", y="), yLabel);
+	private final Label xDeltaLabel = new Label();
+	private final Label yDeltaLabel = new Label();
+	private final HBox hBox = new HBox(new Label("xDelta="), xDeltaLabel, new Label(", yDelta="), yDeltaLabel);
 	private final StackPane stackPane = new StackPane(hBox);
 	private final Scene scene = new Scene(stackPane, 600, 400);
 
@@ -43,12 +43,12 @@ public class Solution010 extends Application {
 		Observable<Double> draggedXObservable = mouseDraggedObservable.map(MouseEvent::getSceneX);
 		Observable<Double> draggedYObservable = mouseDraggedObservable.map(MouseEvent::getSceneY);
 
-		draggedXObservable.withLatestFrom(pressedXObservable, (draggedX, pressedX) -> draggedX - pressedX).map(String::valueOf).subscribe(xLabel::setText);
-		draggedYObservable.withLatestFrom(pressedYObservable, (draggedY, pressedY) -> draggedY - pressedY).map(String::valueOf).subscribe(yLabel::setText);
+		draggedXObservable.withLatestFrom(pressedXObservable, (draggedX, pressedX) -> draggedX - pressedX).map(String::valueOf).subscribe(xDeltaLabel::setText);
+		draggedYObservable.withLatestFrom(pressedYObservable, (draggedY, pressedY) -> draggedY - pressedY).map(String::valueOf).subscribe(yDeltaLabel::setText);
 
 		mouseReleasedObservable.subscribe(event -> {
-			xLabel.setText("");
-			yLabel.setText("");
+			xDeltaLabel.setText("");
+			yDeltaLabel.setText("");
 		});
 	}
 }

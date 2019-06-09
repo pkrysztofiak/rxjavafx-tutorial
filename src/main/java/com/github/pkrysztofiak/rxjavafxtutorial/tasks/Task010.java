@@ -13,9 +13,9 @@ import javafx.stage.Stage;
 
 public class Task010 extends Application {
 
-	private final Label xLabel = new Label();
-	private final Label yLabel = new Label();
-	private final HBox hBox = new HBox(new Label("x="), xLabel, new Label(", y="), yLabel);
+	private final Label xDeltaLabel = new Label();
+	private final Label yDeltaLabel = new Label();
+	private final HBox hBox = new HBox(new Label("xDelta="), xDeltaLabel, new Label(", yDelta="), yDeltaLabel);
 	private final StackPane stackPane = new StackPane(hBox);
 	private final Scene scene = new Scene(stackPane, 600, 400);
 

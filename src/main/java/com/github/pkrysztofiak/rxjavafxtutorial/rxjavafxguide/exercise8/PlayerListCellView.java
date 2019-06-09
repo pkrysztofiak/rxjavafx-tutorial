@@ -25,7 +25,6 @@ public class PlayerListCellView extends HBox {
 	private final ComboBox<Position> positionComboBox = new ComboBox<>(FXCollections.observableArrayList(Position.values()));
 	private final Button removeButton = new Button("Remove");
 
-
 	private final Observable<ActionEvent> removeActionObservable = JavaFxObservable.actionEventsOf(removeButton);
 
 	private final ObjectProperty<Player> employeeProperty = new SimpleObjectProperty<>();
@@ -46,26 +45,26 @@ public class PlayerListCellView extends HBox {
 		employeeChangeObservable.subscribe(behaviour::onEmployeeChanged);
 	}
 
-	public void setEmployee(Player player) {
+	public void setPlayer(Player player) {
 		employeeProperty.set(player);
 	}
 
-	public Observable<Player> employeeRemoveRequestObservable() {
+	public Observable<Player> playerRemoveRequestObservable() {
 		return removeActionObservable.map(removeAction -> employeeProperty.get());
 	}
 
 	private class Behaviour {
 
 		private void onEmployeeChanged(Change<Optional<Player>> change) {
-			change.getOldVal().ifPresent(employee -> {
-				Bindings.unbindBidirectional(nameLabel.textProperty(), employee.nameProperty());
-				Bindings.unbindBidirectional(surnameLabel.textProperty(), employee.surnameProperty());
-				Bindings.unbindBidirectional(positionComboBox.valueProperty(), employee.positionProperty());
+			change.getOldVal().ifPresent(player -> {
+				Bindings.unbindBidirectional(nameLabel.textProperty(), player.nameProperty());
+				Bindings.unbindBidirectional(surnameLabel.textProperty(), player.surnameProperty());
+				Bindings.unbindBidirectional(positionComboBox.valueProperty(), player.positionProperty());
 			});
-			change.getNewVal().ifPresent(employee -> {
-				Bindings.bindBidirectional(nameLabel.textProperty(), employee.nameProperty());
-				Bindings.bindBidirectional(surnameLabel.textProperty(), employee.surnameProperty());
-				Bindings.bindBidirectional(positionComboBox.valueProperty(), employee.positionProperty());
+			change.getNewVal().ifPresent(player -> {
+				Bindings.bindBidirectional(nameLabel.textProperty(), player.nameProperty());
+				Bindings.bindBidirectional(surnameLabel.textProperty(), player.surnameProperty());
+				Bindings.bindBidirectional(positionComboBox.valueProperty(), player.positionProperty());
 			});
 		}
 	}

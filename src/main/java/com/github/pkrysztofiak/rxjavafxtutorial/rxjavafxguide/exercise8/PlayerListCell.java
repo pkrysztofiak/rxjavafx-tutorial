@@ -19,7 +19,7 @@ public class PlayerListCell extends ListCell<Player> {
 	}
 
 	private void onItemChanged(Optional<Player> player) {
-		listCellView.setEmployee(player.orElse(null));
+		listCellView.setPlayer(player.orElse(null));
 	}
 
 	private void onEmptyChanged(boolean empty) {
@@ -27,6 +27,6 @@ public class PlayerListCell extends ListCell<Player> {
 	}
 
 	public Observable<Player> employeeRemoveRequestObservable() {
-		return listCellView.employeeRemoveRequestObservable();
+		return listCellView.playerRemoveRequestObservable();
 	}
 }
