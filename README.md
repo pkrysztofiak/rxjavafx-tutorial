@@ -580,7 +580,7 @@ Write an app which prints x and y coordinates of mouse clicked to appropriate la
 ### ObservableValue changes
 Up to this point we only have worked with events. There is some metadata on event emissions that can be useful, but we are not quite working with data in the traditional sense.
 JavaFX has many implementations of its ObservableValue<T> type. This is essentially a wrapper around a mutable value of a type T , and it notifies any listeners when the value changes. This provides a perfect opportunity to hook a listener onto it and make a reactive stream of value changes.
-Let's create a simple ComboBox and hoop up to it's value property.
+Let's create a simple ComboBox and hook up to it's value property.
 ```java
 	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
 	StackPane stackPane = new StackPane(comboBox);
@@ -630,7 +630,7 @@ You also have the option of pushing the old and new value in a Change item throu
 	stage.setScene(scene);
 	stage.show();
 	JavaFxObservable.changesOf(textField.textProperty())
-	.map(change -> change.getNewVal().matches("[0-9]+") ? change.getNewVal() : change.getOldVal())
+	.map(change -> change.getNewVal().matches("[0-9]*") ? change.getNewVal() : change.getOldVal())
 	.subscribe(textField::setText);
 ```
 Example027
@@ -660,7 +660,7 @@ Let's create a simple application backed by an ObservableList of Strings. There 
 ```
 Example028
 
-Go ahead, type in "Detla", click Add button, type in "Beta", click Add button. As the list of items was changed twice there were two emissions already. Let's focus on the latter. The emisson contains all items that currently are held in the String ListView. Inside flatMapSingle() we transform it Observable.fromIterable() which creates a finite (cold) Observable. Values "Delta" and "Beta" are emitted, mapped to its lenghts and grouped toList(). After that the Observable is done(), we can say it's onSucccess() method was call and it emitted list of lengths as its single and final emission.
+Go ahead, type in "Detla", click Add button, type in "Beta", click Add button. As the list of items was changed twice there were two emissions already. Let's focus on the latter. The emisson contains all items that currently are held in the ListView\<String>. Inside flatMapSingle() we transform it using Observable.fromIterable() which creates a finite (cold) Observable. Values "Delta" and "Beta" are emitted, mapped to its lenghts and grouped toList(). After that the Observable is done, we can kind of say it's onSucccess() method was call and it emitted list of lengths as its single and final emission.
 What we have really done it this example is combining the features of hot and Observables to achive desired behaviour.
 Task007
 Modify the previous example to show in the ListView\<Integer> only distinct lenghts in the ascending order.
@@ -788,11 +788,12 @@ Example034
 
 #### merge()
 Merging is almost like concatenation but with one important difference: it will combine all Observables of a given emission type T simultaneously. This means all emissions from all Observables are merged together at once into a single stream without any regard for order or completion.
-Task008
-Create app with label, decrement button and increment button. Every decrement button click should decrement the label value, same but in opposite direction with increment button. Use merge() and predefined observables.
+##### Task008
+Create app with label, decrement button and increment button. Every decrement button click should decrement the label value, increment button click increments label value. Use merge() and predefined observables.
 #### combineLatest()
-Pushes first emission when every of combined Observables sent an initial emission. After that pushes on any of Observables pushed new emission so it always reflects the contents of every Observable combined.
-Task009
+Reflects combined  state of every Observable composed with the operator. 
+Pushes first combined emission when every of composed Observables already have sent at least one emission. After that pushes on any of Observables emission so it always reflects combined contents of every Observable composed.
+##### Task009
 Create app with label showing current position of stage (x, y, width, height). Use combineLatest() and predefined Observables.
 #### withLatestFrom()
 Is an operator counterpart of combineLatest() factory.
@@ -800,8 +801,8 @@ Is an operator counterpart of combineLatest() factory.
     observable1.withLatestFrom(observable2)
 
 is triggerd only by observable1 emission reflecting the state of both.
-Task010
-Write an app which reflects state of delta (x, y) between mouse pressed an mouse dragged showing it in the label combined of xLabel, yLabel. On mouse released labels should be cleared.
+##### Task010
+Write an app which reflects state of delta x and delta y between mouse pressed an mouse dragged positions. Show it in xLable, yLabel. On mouse released labels should be cleared. Use predefined Observables.
 ### switchMap()
 The switchMap() works identically to any variant of flatMap() , but it will only chase after the last Observable emissions.
 Let's have an employee class
@@ -867,12 +868,12 @@ emily.setName("Em the Greatest");
 alastair.setName("Al the Looser");
 ```
 Example036
-
 As you can see only the last Observable produces emissions.
-Task011
-
+##### Task011
+Let's build a simple form app with employees represented as buttons. Employees's button clicked selects the employee and fills the form with the employee's data. Inside the form we can edit the user's description. Every modification updates external system.
+But application has one big flaw. It sends the updates of description to external system. But on the external system side we have no idea about the employee which had the description updated. Fix the app so it calls ExternalSystem.updateDescription(Employee employee) method.
+##### Task012
 Write circle dragger app.
-
 ## Concurrency
 #### subscribeOn()
 By default, for a given Observable chain, the thread that calls the subscribe() method is the thread the Observable sends emissions on. For instance, a simple subscription to an Observable inside a main() method will fire the emissions on the main daemon thread.
@@ -892,7 +893,7 @@ However, we can easily switch these emissions to happen on another thread using 
 Observable.just("one", "two", "three")
 .subscribeOn(Schedulers.newThread())
 .subscribe(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next));
-TimeUnit.SECONDS.sleep(1);
+TimeUnit.SECONDS.sleep(4);
 ```	
 Example051
 
@@ -901,7 +902,7 @@ Produces output:
     [RxNewThreadScheduler-1] next=one
     [RxNewThreadScheduler-1] next=two
     [RxNewThreadScheduler-1] next=three
-This way we can declare our Observable chain and an Observer , but then immediately move on without waiting for the emissions to finish. Those are now happening on a new thread named RxNewThreadScheduler-1 . Notice too we have to call TimUnit.SECONDS.sleep(3) afterwards to make the main thread sleep for 3 seconds. This gives our Observable a chance to fire all emissions before the program exits.
+This way we can declare our Observable chain and an Observer, but then immediately move on without waiting for the emissions to finish. Those are now happening on a new thread named RxNewThreadScheduler-1 . Notice too we have to call TimUnit.SECONDS.sleep(4) afterwards to make the main thread sleep for 3 seconds. This gives our Observable a chance to fire all emissions before the program exits.
 A critical behavior to note here is that all emissions are happening sequentially on a single RxNewThreadScheduler-1 thread. Emissions are strictly happening one-at-a-time on a single thread. There is no parallelization or racing to call onNext() throughout the chain. If this did occur, it would break the Observable contract.
 subscribeOn() can be declared anywhere in the Observable chain, and it will communicate all the way up to the source what thread to fire emissions on. If you pointlessly declare multiple subscribeOn() operators in a chain, the leftmost one (closest to the source) will win.
 In reality, you should be conservative about using Schedulers.newThread() as it creates a new thread for each Observer. You will notice that if we attach multiple Observers to this Observable, we are going to create a new thread for each Observer.
