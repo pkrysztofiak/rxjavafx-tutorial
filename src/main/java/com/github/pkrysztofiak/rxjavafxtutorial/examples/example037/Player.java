@@ -1,4 +1,4 @@
-package com.github.pkrysztofiak.rxjavafxtutorial.rxjavafxguide.exercise8;
+package com.github.pkrysztofiak.rxjavafxtutorial.examples.example037;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -11,10 +11,19 @@ public class Player {
 	private final StringProperty surnameProperty = new SimpleStringProperty();
 	private final ObjectProperty<Position> positionProperty = new SimpleObjectProperty<>();
 
+	private Stats stats = new Stats();
+
 	public Player(String name, String surname, Position position) {
 		nameProperty.set(name);
 		surnameProperty.set(surname);
 		positionProperty.set(position);
+	}
+
+	public Player(Player player) {
+		nameProperty.set(player.nameProperty.get());
+		surnameProperty.set(player.surnameProperty.get());
+		positionProperty.set(player.positionProperty.get());
+		stats = new Stats(player.getStats());
 	}
 
 	public StringProperty nameProperty() {
@@ -27,5 +36,13 @@ public class Player {
 
 	public ObjectProperty<Position> positionProperty() {
 		return positionProperty;
+	}
+
+	public void setStats(Stats stats) {
+		this.stats = stats;
+	}
+
+	public Stats getStats() {
+		return stats;
 	}
 }
