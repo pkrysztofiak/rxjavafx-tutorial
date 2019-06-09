@@ -902,7 +902,7 @@ Produces output:
     [RxNewThreadScheduler-1] next=one
     [RxNewThreadScheduler-1] next=two
     [RxNewThreadScheduler-1] next=three
-This way we can declare our Observable chain and an Observer, but then immediately move on without waiting for the emissions to finish. Those are now happening on a new thread named RxNewThreadScheduler-1 . Notice too we have to call TimUnit.SECONDS.sleep(4) afterwards to make the main thread sleep for 3 seconds. This gives our Observable a chance to fire all emissions before the program exits.
+This way we can declare our Observable chain and an Observer, but then immediately move on without waiting for the emissions to finish. Those are now happening on a new thread named RxNewThreadScheduler-1 . Notice too we have to call TimUnit.SECONDS.sleep(4) afterwards to make the main thread sleep for 4 seconds. This gives our Observable a chance to fire all emissions before the program exits.
 A critical behavior to note here is that all emissions are happening sequentially on a single RxNewThreadScheduler-1 thread. Emissions are strictly happening one-at-a-time on a single thread. There is no parallelization or racing to call onNext() throughout the chain. If this did occur, it would break the Observable contract.
 subscribeOn() can be declared anywhere in the Observable chain, and it will communicate all the way up to the source what thread to fire emissions on. If you pointlessly declare multiple subscribeOn() operators in a chain, the leftmost one (closest to the source) will win.
 In reality, you should be conservative about using Schedulers.newThread() as it creates a new thread for each Observer. You will notice that if we attach multiple Observers to this Observable, we are going to create a new thread for each Observer.
@@ -967,4 +967,152 @@ Example053
 
 ### observeOn()
 A lot of people get confused by the difference between subscribeOn() and observeOn(), but the distinction is quite simple. A subsribeOn() instructs the source Observable what thread to emit  items on. However, the observeOn() switches emissions to a different thread at that point in the chain.
-In JavaFX, the most common useage of observeOn() is to put items back on the JavaFX thread after a compution or IO operation finishes from another thread. Say you wanted to import some expensive data on Schedulers.io() and collect it in a List . Once it is ready, you want to move that List emission to the JavaFX thread to feed a ListView . That is perfectly doable with an observeOn().
+Exmaple054
+```java
+Observable.just("one", "two", "three")
+.subscribeOn(Schedulers.computation())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.observeOn(Schedulers.io())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.observeOn(Schedulers.computation())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.subscribe(next -> System.out.println("Observer[" + Thread.currentThread().getName() + "] next=" + next));
+TimeUnit.SECONDS.sleep(4);
+```
+Produces output:
+```
+[RxComputationThreadPool-1] next=one
+[RxComputationThreadPool-1] next=two
+[RxComputationThreadPool-1] next=three
+[RxCachedThreadScheduler-1] next=one
+[RxCachedThreadScheduler-1] next=two
+[RxCachedThreadScheduler-1] next=three
+[RxComputationThreadPool-2] next=one
+Observer[RxComputationThreadPool-2] next=one
+[RxComputationThreadPool-2] next=two
+Observer[RxComputationThreadPool-2] next=two
+[RxComputationThreadPool-2] next=three
+Observer[RxComputationThreadPool-2] next=three
+```
+Our source emits on RxComputationThreadPool because we instructed it using 
+
+    subscribeOn(Schedulers.computation())
+
+Every source emission is sent on said thread in order. After that we call
+
+    observeOn(Schedulers.io())
+It creates kind of Observer which collects all pervious emissions and push them serially on a new thread - RxCachedThreadScheduler. After that we switch the thread one more time and finally our emissions get consumed by the Observer. Notice that the notion of concurrency does not appear anywhere in the chain, as said before.
+Let's check how the hot Observables behave.
+Example055
+```java
+StackPane stackPane = new StackPane();
+Scene scene = new Scene(stackPane, 400, 400);
+stage.setScene(scene);
+stage.show();
+JavaFxObservable.eventsOf(stackPane, MouseEvent.MOUSE_MOVED)
+.doOnNext(moveEvent -> System.out.println("[" + Thread.currentThread().getName() + "] next=[x" + moveEvent.getX() + ", y=" + moveEvent.getY() + "]"))
+.observeOn(Schedulers.computation())
+.subscribe(moveEvent -> System.out.println("Observer[" + Thread.currentThread().getName() + "] next=[x" + moveEvent.getX() + ", y=" + moveEvent.getY() + "]"));
+```
+Produces output:
+
+    [JavaFX Application Thread] next=[x4.0, y=240.0]
+    [JavaFX Application Thread] next=[x15.0, y=236.0]
+    Observer[RxComputationThreadPool-1] next=[x4.0, y=240.0]
+    Observer[RxComputationThreadPool-1] next=[x15.0, y=236.0]
+    [JavaFX Application Thread] next=[x30.0, y=234.0]
+    Observer[RxComputationThreadPool-1] next=[x30.0, y=234.0]
+    [JavaFX Application Thread] next=[x40.0, y=233.0]
+    Observer[RxComputationThreadPool-1] next=[x40.0, y=233.0]
+    [JavaFX Application Thread] next=[x56.0, y=230.0]
+    Observer[RxComputationThreadPool-1] next=[x56.0, y=230.0]
+Analizing two first and subsequent emissions gives you and idea that behaviour is exactly the same. There is no chance that emission1 at time1 will overtake emission2 at time2 where 
+time1 < time2.
+In JavaFX, the most common useage of observeOn() is to put emissions back on the JavaFX thread after a compution or IO operation finishes from another thread. Say you wanted to import some expensive data on Schedulers.io() and collect it in a List . Once it is ready, you want to move that List emission to the JavaFX thread to feed a ListView . That is perfectly doable with an observeOn().
+Example056
+```java
+ListView<String> listView = new ListView<>();
+Scene scene = new Scene(listView);
+stage.setScene(scene);
+stage.show();
+Observable.just("one", "two", "three")
+.observeOn(Schedulers.io())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.observeOn(JavaFxScheduler.platform())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.subscribe(listView.getItems()::add);
+```
+Produces output:
+
+    [RxCachedThreadScheduler-1] next=one
+    [RxCachedThreadScheduler-1] next=two
+    [RxCachedThreadScheduler-1] next=three
+    [JavaFX Application Thread] next=one
+    [JavaFX Application Thread] next=two
+    [JavaFX Application Thread] next=three
+#### delay()
+This all happens a bit too fast to see this occuring, so let's exaggerate this example and emulate a long-running database query or request. Use the delay() operator to delay the emissions by 3 seconds. Note that delay() subscribes on the Schedulers.computation() by default, so having a subscribeOn() no longer has any effect. But we can pass the Schedulers.io() as a third argument to make it use an IO thread instead.
+Example057
+```java
+ListView<String> listView = new ListView<>();
+Scene scene = new Scene(listView);
+stage.setScene(scene);
+stage.show();
+Observable.just("one", "two", "three")
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.delay(3, TimeUnit.SECONDS, Schedulers.io())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.observeOn(JavaFxScheduler.platform())
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.subscribe(listView.getItems()::add);
+```
+Produces output:
+
+    [JavaFX Application Thread] next=one
+    [JavaFX Application Thread] next=two
+    [JavaFX Application Thread] next=three
+    [RxCachedThreadScheduler-1] next=one
+    [RxCachedThreadScheduler-1] next=two
+    [RxCachedThreadScheduler-1] next=three
+    [JavaFX Application Thread] next=one
+    [JavaFX Application Thread] next=two
+    [JavaFX Application Thread] next=three
+Notice that our UI is empty for 3 seconds before it is finally populated. The data importing and collecting into a List happens on the IO thread, and then it is safely emitted back on the JavaFX thread where it is populated into the ListView . The JavaFX thread does not hold up the UI from displaying due to this operation keeping it busy. If we had more controls we would see the UI is completely interactive as well during this background operation.
+It's a huge progress in comparision to processing all data on Fx thread, but not really what we expect out of well working application. If your emissions represent long-running database query or request then we got a problem because first request must finish to run a second request and all the way down to last emission.
+#### Chaining multiple observeOn() calls
+It is also not uncommon to use multiple observeOn() calls. Here is a more reallifeexample: let's say you want to create an application that displays a text response (such as JSON) from a URL. This has the potential to create an unrespsonsive application that freezes while it is fetching the request. But using an observeOn() we can switch this work from the FX thread to an IO therad, then call another observeOn() afterwards to put it back on the FX thread.
+Example058
+```java
+Button button = new Button("Send request");
+TextArea textArea = new TextArea();
+textArea.setWrapText(true);
+VBox vBox = new VBox(textArea, button);
+Scene scene = new Scene(vBox);
+stage.setScene(scene);
+stage.show();
+
+JavaFxObservable.actionEventsOf(button)
+.observeOn(Schedulers.io())
+.map(actionEvent -> request("https://api.github.com/users/pkrysztofiak"))
+.observeOn(JavaFxScheduler.platform())
+.subscribe(textArea::setText);
+```
+You can find out yourself that during request UI is fully responsive.
+Of course, you can click the "Submit" Button multiple times and that could queue up the requests in an undesirable way. But at least the work is kept off the UI thread.
+### Parallelization
+Did you know the flatMap() (as well as flatMapSingle() and flatMapMaybe() ) is actually a concurrency tool? RxJava by default does not do parallelization, so effectively there is no way to parallelize an Observable . As we have seen, subscribeOn() and observeOn() merely move emissions from one thread to another thread, not one thread to many threads. However, you can leverage flatMap() to create several Observables parallelizing emissions on different threads.
+Example059
+```java
+Observable.just("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.flatMap(number -> Observable.just(number).subscribeOn(Schedulers.computation()).map(Example059::process))
+.subscribe(next -> System.out.println("Observer [" + Thread.currentThread().getName() + "] next=" + next));
+TimeUnit.SECONDS.sleep(30);
+```
+Run the code expirince parallelization.
+### Switching, throttling and buffering
+In the previous chapter, we learned that RxJava makes concurrency accessible and fairly trivial to accomplish. But being able to compose concurrency easily enables us to do much more with RxJava.
+In UI development, users will inevitably click things that kick off long-running processes. Even if you have concurrency in place, users that rapidly select UI inputs can kick of expensive processes, and those processes will start to queue up undesirably. Other times, we may want to group up rapid emissions to make them a single unit, such as typing keystrokes. There are tools to effectively overcome all these problems, and we will cover them in this chapter.
+#### switchMap()
+
+
