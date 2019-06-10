@@ -796,9 +796,9 @@ Is an operator counterpart of combineLatest() factory.
 
 is triggerd only by observable1 emission reflecting the state of both.
 ##### Task010
-Write an app which reflects state of delta x and delta y between mouse pressed an mouse dragged positions. Show it in xLable, yLabel. On mouse released labels should be cleared. Use predefined Observables.
+Write an app which reflects state of delta x and delta y between mouse pressed an mouse dragged positions. Show it in xLabel, yLabel. On mouse released labels should be cleared. Use predefined Observables.
 ### switchMap()
-The switchMap() works identically to any variant of flatMap() , but it will only chase after the last Observable emissions.
+The switchMap() works identically to any variant of flatMap() , but it will only chase after the last Observable emission.
 Let's have an employee class
 ```java
 public class Employee {
@@ -824,6 +824,7 @@ public class Employee {
 }
 ```
 Let's create list of three employees and flatMap to their nameProperty.
+##### Example035
 ```java
 Employee john = new Employee("John");
 Employee emily = new Employee("Emily");
@@ -837,8 +838,6 @@ john.setName("Johnny");
 emily.setName("Em");
 alastair.setName("Al");
 ```
-Example035
-
 Produces output:
 
     John
@@ -848,6 +847,7 @@ Produces output:
     Em
     Al
 As you can see every Observable we created with the flatMap is stil alive and produces emissions.
+##### Example036
 ```java
 Employee john = new Employee("John");
 Employee emily = new Employee("Emily");
@@ -865,11 +865,18 @@ john.setName("Johnny the First");
 emily.setName("Em the Greatest");
 alastair.setName("Al the Looser");
 ```
-Example036
+Produces output:
+
+    John
+    Emily
+    Alastair
+    Al
+    Al the Looser
+
 As you can see only the last Observable produces emissions.
 ##### Task011
-Let's build a simple form app with employees represented as buttons. Employees's button clicked selects the employee and fills the form with the employee's data. Inside the form we can edit the user's description. Every modification updates external system.
-But application has one big flaw. It sends the updates of description to external system. But on the external system side we have no idea about the employee which had the description updated. Fix the app so it calls ExternalSystem.updateDescription(Employee employee) method.
+Let's build a simple form app with employees represented as buttons. Employees's button clicked selects the employee and fills the form with the employee's data. Inside the form we can edit the employee's description. Every modification updates external system.
+But application has one big flaw. It sends the updates of description to external system, but on the external system side we have no idea from which employee this update originates from. Fix the app so it calls ExternalSystem.updateDescription(Employee employee) method.
 ##### Task012
 Write circle dragger app.
 ## Concurrency
