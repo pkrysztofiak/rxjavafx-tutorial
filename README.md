@@ -622,7 +622,7 @@ Task006
 Let's get a little bit creative. Sum every selected value length and show it to the user in the label.
 This example may be a bit contrived, but hopefully you are starting to see some of the possibilities when you have a chain of operators "reacting" to a change in a ComboBox . Pushing each value every time it is selected in a ComboBox allows you to quickly tell other parts of the UI to update accordingly.
 Again, you can use this factory on any ObservableValue . This means you can hook into any JavaFX component property and track its changes reactively. The possibilities are quite vast.
-#### cahangesOf()
+#### changesOf()
 You also have the option of pushing the old and new value in a Change item through the changesOf() factory. This can be helpful for validation, and you can restore that old value back into the control if the new value fails to meet a condition.
 ```java
 TextField textField = new TextField();
