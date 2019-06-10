@@ -638,7 +638,7 @@ Example027
 ### Collections and data
 Any sizable application needs to work with data and collections of items. One of the greatest utilities to come out of JavaFX are ObservableCollections such as ObservableList , ObservableSet, and ObservableMap . These implementations of List , Set , and Map are built specifically for JavaFX to notify the UI when it has been modified, and any control built off it will visually update accordingly.
 However, these ObservableCollections can have custom listeners added to them. This creates an opportunity to reactively work with data through collections. The idea of emitting a collection every time it changes allows some surprisingly useful reactive transformations, and we will see plenty of examples in this section.
-####emitOnChanged()
+#### emitOnChanged()
 Let's create a simple application backed by an ObservableList of Strings. There will be a ListView\<String> to display these values, and another ListView\<Integer> that will hold their lengths. We will use a TextField and a Button to add Strings to the ObservableList , and both ListViews should update accordingly with each addition.
 ```java
 ListView<String> listView = new ListView<>();
