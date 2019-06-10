@@ -1113,6 +1113,105 @@ Run the code expirince parallelization.
 ### Switching, throttling and buffering
 In the previous chapter, we learned that RxJava makes concurrency accessible and fairly trivial to accomplish. But being able to compose concurrency easily enables us to do much more with RxJava.
 In UI development, users will inevitably click things that kick off long-running processes. Even if you have concurrency in place, users that rapidly select UI inputs can kick of expensive processes, and those processes will start to queue up undesirably. Other times, we may want to group up rapid emissions to make them a single unit, such as typing keystrokes. There are tools to effectively overcome all these problems, and we will cover them in this chapter.
-#### switchMap()
+##### Task013
+There are two ListView\<String> next to each other. First has predefined values "Alpha", "Beta", "Gamma", "Delta". On every selection change present String from the first list as letter per cell in the second list. Click on "Alpha" should create five cells in second ListView with values "A", "l", "p", "h", "a". Use regex "(?!^)" to split String into characters.
+##### Task014
+In task013 this is a pretty quick computation which hardly keeps the JavaFX thread busy. But in the real world, running database queries or HTTP requests can take awhile. The last thing we want is for these rapid inputs to create a queue of requests that will quickly make the application unusable as it works through the queue. Let's emulate this by using the delay() operator. Remember that the delay() operator already specifies a subscribeOn() internally, but we can specify an argument which Scheduler it uses. Let's put it in the IO Scheduler. The Observer must receive each emission on the JavaFX thread, so be sure to observeOn() the JavaFX Scheduler before the emission goes to the Observer .
 
+Now if we click several items on the top ListView , you will notice a 3-second lag before the letters show up on the bottom ListView . This emulates longrunning requests for each click, and now we have these requests queuing up and causing the bottom ListView to go berserk, trying to display each previous request before it gets to the current one. Obviously, this is undesirable. We likely want to kill previous requests when a new one comes in, and this is simple to do.
+Example060
+```java
+JavaFxObservable.valuesOf(listView.getSelectionModel().selectedItemProperty())
+.switchMap(letter -> Observable.fromArray(letter.split("(?!^)")).delay(3, TimeUnit.SECONDS, Schedulers.io()).toList().toObservable())
+.observeOn(JavaFxScheduler.platform())
+.subscribe(lettersListView.getItems()::setAll);
+```	
+The switchMap() works identically to any variant of flatMap() , but it will only chase after the latest user input and kill any previous requests. In other words, it is only chasing after the latest Observable derived from the latest emission, and unsubscribing any previous requests. The switchMap() is a powerful utility to create responsive and resilient UI's, and is the perfect way to handle click-happy users!
+You can also use the switchMap() to cancel long-running or infinite processes using a neat little trick with Observable.empty() . For instance, a ToggleButton has a true/false state depending on whether it is selected. When you emit its false state, you can return an empty Observable to kill the previous processing Observable , as shown below. When the ToggleButton is selected, it will kick off an Observable.interval() that emits a consecutive integer every 10 milliseconds. But unselecting the ToggleButton will cause the flatMap() to switch to an Observable.empty() , killing and unsubscribing from the Observable.interval()
+Example061
+```java
+ToggleButton toggleButton = new ToggleButton("Start");
+Label label = new Label("0");
+HBox hBox = new HBox(toggleButton, label);
+Scene scene = new Scene(hBox);
+stage.setScene(scene);
+stage.show();
 
+JavaFxObservable.valuesOf(toggleButton.selectedProperty())
+.switchMap(selected -> {
+	if (selected) {
+		toggleButton.setText("Stop");
+		return Observable.interval(1, TimeUnit.SECONDS).map(next -> next + 1);
+	} else {
+		label.setText("0");
+		toggleButton.setText("Start");
+		return Observable.empty();
+	}
+})
+.observeOn(JavaFxScheduler.platform())
+.map(String::valueOf)
+.subscribe(label::setText);
+```
+The switchMap() can come in handy for any situation where you want to switch from one Observable source to another.
+##### Task015
+Modify above example and make work the Stop button like Pause rather than Reset.
+##### Task016
+Create an app which pins a point whenever user keeps mouse cursor still for more than 2 seconds. Call method pinPoint() on described action.
+### Buffering
+We may want to collect emissions into a List , but doing so on a batching condition so several lists are emitted. The buffer() operators help accomplish this, and they have several overload flavors. The simplest buffer() specifies the number of emissions that will be collected into a List before that List is pushed forward, and then it will start a new one. In this example, emissions will be grouped up in batches of 10.
+#### Example062
+```java
+Observable.range(0, 100)
+.buffer(10)
+.subscribe(System.out::println);
+```	
+Produces output:
+
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    [20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+    [30, 31, 32, 33, 34, 35, 36, 37, 38, 39]
+    [40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+    [50, 51, 52, 53, 54, 55, 56, 57, 58, 59]
+    [60, 61, 62, 63, 64, 65, 66, 67, 68, 69]
+    [70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+    [80, 81, 82, 83, 84, 85, 86, 87, 88, 89]
+    [90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
+There are other flavors of buffer() . Another will collect emissions based on a specified time cutoff. If you have an Observable emitting at an interval of 300 milliseconds, you can buffer them into a List at every second.
+#### Example063
+```java
+	Observable.interval(300, TimeUnit.MILLISECONDS)
+	.buffer(1, TimeUnit.SECONDS)
+	.subscribe(System.out::println);
+```
+Produces output:
+
+    [0, 1, 2]
+    [3, 4, 5]
+    [6, 7, 8, 9]
+    [10, 11, 12]
+    [13, 14, 15]
+    [16, 17, 18, 19]
+    [20, 21, 22]
+    [23, 24, 25]
+    [26, 27, 28, 29]
+    [30, 31, 32]
+### Throattling    
+When you have a rapidly firing Observable , you may just want to emit the first or last emission within a specified scope. For example, you can use throttleLast() to emit the last emission for each fixed time interval.
+```java
+Observable.interval(300, TimeUnit.MILLISECONDS)
+.throttleLast(1, TimeUnit.SECONDS)
+.subscribe(System.out::println);
+```	
+Produces output:
+
+    2
+    5
+    9
+    12
+    15
+    19
+    22
+    25
+    28
+    32
