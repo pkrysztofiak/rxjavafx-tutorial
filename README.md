@@ -637,9 +637,10 @@ Example027
 
 ### Collections and data
 Any sizable application needs to work with data and collections of items. One of the greatest utilities to come out of JavaFX are ObservableCollections such as ObservableList , ObservableSet, and ObservableMap . These implementations of List , Set , and Map are built specifically for JavaFX to notify the UI when it has been modified, and any control built off it will visually update accordingly.
-However, these ObservableCollections can have custom listeners added to them. This creates an opportunity to reactively work with data through collections. The idea of emitting a collection every time it changes allows some surprisingly useful reactive transformations, and we will see plenty of examples in this section.
+These ObservableCollections can have custom listeners added to them. This creates an opportunity to reactively work with data through collections. The idea of emitting a collection every time it changes allows some surprisingly useful reactive transformations, and we will see plenty of examples in this section.
 #### emitOnChanged()
 Let's create a simple application backed by an ObservableList of Strings. There will be a ListView\<String> to display these values, and another ListView\<Integer> that will hold their lengths. We will use a TextField and a Button to add Strings to the ObservableList , and both ListViews should update accordingly with each addition.
+##### Example028
 ```java
 ListView<String> listView = new ListView<>();
 ListView<Integer> lenghtsListView = new ListView<>();
@@ -652,21 +653,23 @@ Scene scene = new Scene(vBox);
 stage.setScene(scene);
 stage.show();
 
-JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(listView.getItems()::add);
+JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(text -> {
+	listView.getItems().add(text);
+	textField.setText("");
+});
 
 JavaFxObservable.emitOnChanged(listView.getItems())
 .flatMapSingle(items -> Observable.fromIterable(items).map(String::length).toList())
 .subscribe(lenghtsListView.getItems()::setAll);
 ```
-Example028
-
 Go ahead, type in "Detla", click Add button, type in "Beta", click Add button. As the list of items was changed twice there were two emissions already. Let's focus on the latter. The emisson contains all items that currently are held in the ListView\<String>. Inside flatMapSingle() we transform it using Observable.fromIterable() which creates a finite (cold) Observable. Values "Delta" and "Beta" are emitted, mapped to its lenghts and grouped toList(). After that the Observable is done, we can kind of say it's onSucccess() method was call and it emitted list of lengths as its single and final emission.
 What we have really done it this example is combining the features of hot and Observables to achive desired behaviour.
-Task007
+##### Task007
 Modify the previous example to show in the ListView\<Integer> only distinct lenghts in the ascending order.
 ### Add, remove, ad update events
 There are factories for ObservableList , ObservableSet , and ObservableMap to emit specific change events against those collections.
 #### additionsOf()
+##### Example029
 ```java
 ObservableList<String> numbers = FXCollections.observableArrayList();
 JavaFxObservable.additionsOf(numbers)
@@ -674,8 +677,6 @@ JavaFxObservable.additionsOf(numbers)
 numbers.add("one");
 numbers.addAll("two", "three");
 ```	
-Example029
-
 Produces output:
 
     one
@@ -684,6 +685,7 @@ Produces output:
 Note that this factory has no initial emission. It will only emit additions going forward after subscription. The idea of removalsOf() is pretty the same.
 #### updatesOf()
 An UPDATED emission occurs when an ObservableValue property of a T item in an ObservableList\<T> changes. Consider a User class with an updateable Property called name.
+##### Example030
 ```java
 class User {
 
@@ -716,8 +718,6 @@ JavaFxObservable.updatesOf(users).subscribe(System.out::println);
 john.setName("Johnny");
 lucy.setName("Lucinda");
 ```
-Example030
-
 Produces output:
 
     User[name=Johnny]
@@ -742,6 +742,7 @@ Produces output:
 
     [3, 3, 5, 4, 4]
 It is very critical to note that onComplete() must be called by each Observable so it moves on to the next one. If you have an infinite Observable in a concatenated operation, it will hold up the line by infinitely emitting items, forever keeping any Observables after it from getting fired. Concatentation is also available as an operator and not just a factory, and it should yield the same output.
+##### Example032
 ```java
 Observable<String> source1 = Observable.just("one", "two");
 Observable<String> source2 = Observable.just("three", "four", "five");
@@ -751,13 +752,12 @@ source1.concatWith(source2)
 .toList()
 .subscribe(System.out::println);
 ```
-Example032
-
 Produces output:
 
     [3, 3, 5, 4, 4]
 #### startWith()
 If you want to do a concenation but put another Observable in front rather than after, you can use startWith() instead.
+##### Example033
 ```java
 Observable<String> source1 = Observable.just("one", "two");
 Observable<String> source2 = Observable.just("three", "four", "five");
@@ -767,12 +767,11 @@ source2.startWith(source1)
 .toList()
 .subscribe(System.out::println);
 ```
-Example033
-
 Produces output:
 
     [3, 3, 5, 4, 4]
 But we can also use startWith() to force the first emssion without latter Observable involved.
+##### Example034
 ```java
 	Observable<String> source1 = Observable.just("two", "three");
 
@@ -781,8 +780,6 @@ But we can also use startWith() to force the first emssion without latter Observ
 	.toList()
 	.subscribe(System.out::println);
 ```
-Example034
-
 #### merge()
 Merging is almost like concatenation but with one important difference: it will combine all Observables of a given emission type T simultaneously. This means all emissions from all Observables are merged together at once into a single stream without any regard for order or completion.
 ##### Task008
