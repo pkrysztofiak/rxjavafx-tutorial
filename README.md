@@ -957,9 +957,10 @@ Single Thread Executor
 Finally, the JavaFxScheduler is packaged with the RxJavaFX library. It executes the emissions on the JavaFX thread so they can safely make modifications to a UI.
 All RxJavaFX factories already emit on the JavaFxScheduler . Therefore, declaring a subscribeOn() against these sources will have no affect.
 ### Intervals
-While we are talking about concurrency, it is worth mentioning there are other factories that already emit on a specific Scheduler . For instance, there are factories in both RxJava and RxJavaFX to emit at a specified time interval.
+While we are talking about concurrency, it is worth mentioning there are other factories that already emit on a specific Scheduler . For instance, there are factories to emit at a specified time interval.
 In RxJava, there is an Observable.interval() that will emit a consecutive Long at every specified time interval. By default, this runs on the Schedulers.computation() unless you specify a different one as a third argument.
 Here is an application that will increment a Label every second.
+##### Example053
 ```java
 Label label = new Label();
 StackPane hBox = new StackPane(label);
@@ -967,12 +968,10 @@ Scene scene = new Scene(hBox, 100, 100);
 stage.setScene(scene);
 stage.show();
 Observable.interval(1, TimeUnit.SECONDS, JavaFxScheduler.platform()).map(String::valueOf).subscribe(label::setText);
-```	
-Example053
-
+```
 ### observeOn()
 A lot of people get confused by the difference between subscribeOn() and observeOn(), but the distinction is quite simple. A subsribeOn() instructs the source Observable what thread to emit  items on. However, the observeOn() switches emissions to a different thread at that point in the chain.
-Exmaple054
+##### Example054
 ```java
 Observable.just("one", "two", "three")
 .subscribeOn(Schedulers.computation())
@@ -1006,9 +1005,9 @@ Our source emits on RxComputationThreadPool because we instructed it using
 Every source emission is sent on said thread in order. After that we call
 
     observeOn(Schedulers.io())
-It creates kind of Observer which collects all pervious emissions and push them serially on a new thread - RxCachedThreadScheduler. After that we switch the thread one more time and finally our emissions get consumed by the Observer. Notice that the notion of concurrency does not appear anywhere in the chain, as said before.
+It creates kind of Observer which collects all pervious emissions and push them serially on a new thread - RxCachedThreadScheduler. After that we switch the thread one more time and finally our emissions get consumed by the Observer. Notice that the notion of concurrency does not appear anywhere in the chain.
 Let's check how the hot Observables behave.
-Example055
+##### Example055
 ```java
 StackPane stackPane = new StackPane();
 Scene scene = new Scene(stackPane, 400, 400);
@@ -1034,42 +1033,45 @@ Produces output:
 Analizing two first and subsequent emissions gives you and idea that behaviour is exactly the same. There is no chance that emission1 at time1 will overtake emission2 at time2 where 
 time1 < time2.
 In JavaFX, the most common useage of observeOn() is to put emissions back on the JavaFX thread after a compution or IO operation finishes from another thread. Say you wanted to import some expensive data on Schedulers.io() and collect it in a List . Once it is ready, you want to move that List emission to the JavaFX thread to feed a ListView . That is perfectly doable with an observeOn().
-Example056
+##### Example056
 ```java
 ListView<String> listView = new ListView<>();
 Scene scene = new Scene(listView);
 stage.setScene(scene);
 stage.show();
+
 Observable.just("one", "two", "three")
 .observeOn(Schedulers.io())
 .doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.toList()
 .observeOn(JavaFxScheduler.platform())
-.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
-.subscribe(listView.getItems()::add);
+.doOnSuccess(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.subscribe(listView.getItems()::setAll);
 ```
 Produces output:
 
     [RxCachedThreadScheduler-1] next=one
     [RxCachedThreadScheduler-1] next=two
     [RxCachedThreadScheduler-1] next=three
-    [JavaFX Application Thread] next=one
-    [JavaFX Application Thread] next=two
-    [JavaFX Application Thread] next=three
+    [JavaFX Application Thread] next=[one, two, three]
+
 #### delay()
 This all happens a bit too fast to see this occuring, so let's exaggerate this example and emulate a long-running database query or request. Use the delay() operator to delay the emissions by 3 seconds. Note that delay() subscribes on the Schedulers.computation() by default, so having a subscribeOn() no longer has any effect. But we can pass the Schedulers.io() as a third argument to make it use an IO thread instead.
-Example057
+##### Example057
 ```java
 ListView<String> listView = new ListView<>();
 Scene scene = new Scene(listView);
 stage.setScene(scene);
 stage.show();
+
 Observable.just("one", "two", "three")
 .doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
 .delay(3, TimeUnit.SECONDS, Schedulers.io())
 .doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.toList()
 .observeOn(JavaFxScheduler.platform())
-.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
-.subscribe(listView.getItems()::add);
+.doOnSuccess(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+.subscribe(listView.getItems()::setAll);
 ```
 Produces output:
 
@@ -1079,9 +1081,8 @@ Produces output:
     [RxCachedThreadScheduler-1] next=one
     [RxCachedThreadScheduler-1] next=two
     [RxCachedThreadScheduler-1] next=three
-    [JavaFX Application Thread] next=one
-    [JavaFX Application Thread] next=two
-    [JavaFX Application Thread] next=three
+    [JavaFX Application Thread] next=[one, two, three]
+
 Notice that our UI is empty for 3 seconds before it is finally populated. The data importing and collecting into a List happens on the IO thread, and then it is safely emitted back on the JavaFX thread where it is populated into the ListView . The JavaFX thread does not hold up the UI from displaying due to this operation keeping it busy. If we had more controls we would see the UI is completely interactive as well during this background operation.
 It's a huge progress in comparision to processing all data on Fx thread, but not really what we expect out of well working application. If your emissions represent long-running database query or request then we got a problem because first request must finish to run a second request and all the way down to last emission.
 #### Chaining multiple observeOn() calls
@@ -1103,10 +1104,10 @@ JavaFxObservable.actionEventsOf(button)
 .subscribe(textArea::setText);
 ```
 You can find out yourself that during request UI is fully responsive.
-Of course, you can click the "Submit" Button multiple times and that could queue up the requests in an undesirable way. But at least the work is kept off the UI thread.
+Of course, you can click the "Send request" Button multiple times and that could queue up the requests in an undesirable way. But at least the work is kept off the UI thread.
 ### Parallelization
 Did you know the flatMap() (as well as flatMapSingle() and flatMapMaybe() ) is actually a concurrency tool? RxJava by default does not do parallelization, so effectively there is no way to parallelize an Observable . As we have seen, subscribeOn() and observeOn() merely move emissions from one thread to another thread, not one thread to many threads. However, you can leverage flatMap() to create several Observables parallelizing emissions on different threads.
-Example059
+##### Example059
 ```java
 Observable.just("one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
 .doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
@@ -1114,17 +1115,17 @@ Observable.just("one", "two", "three", "four", "five", "six", "seven", "eight", 
 .subscribe(next -> System.out.println("Observer [" + Thread.currentThread().getName() + "] next=" + next));
 TimeUnit.SECONDS.sleep(30);
 ```
-Run the code expirince parallelization.
+Run the code to experince parallelization.
 ### Switching, throttling and buffering
 In the previous chapter, we learned that RxJava makes concurrency accessible and fairly trivial to accomplish. But being able to compose concurrency easily enables us to do much more with RxJava.
-In UI development, users will inevitably click things that kick off long-running processes. Even if you have concurrency in place, users that rapidly select UI inputs can kick of expensive processes, and those processes will start to queue up undesirably. Other times, we may want to group up rapid emissions to make them a single unit, such as typing keystrokes. There are tools to effectively overcome all these problems, and we will cover them in this chapter.
+In UI development, users will inevitably click things that kick off long-running processes. Even if you have concurrency in place, users that rapidly select UI inputs can kick of expensive processes, and those processes will start to queue up undesirably. Other times, we may want to group up rapid emissions to make them a single unit, such as typing keystrokes. There are tools to effectively overcome all these problems, and we will cover them in this section.
 ##### Task013
-There are two ListView\<String> next to each other. First has predefined values "Alpha", "Beta", "Gamma", "Delta". On every selection change present String from the first list as letter per cell in the second list. Click on "Alpha" should create five cells in second ListView with values "A", "l", "p", "h", "a". Use regex "(?!^)" to split String into characters.
+There are two ListView\<String> grouped in HBox. First has predefined values "Alpha", "Beta", "Gamma", "Delta". On every selection change the string value from the first list should be mapped as character per cell in the second list. Click on "Alpha" should create five cells in second ListView with values "A", "l", "p", "h", "a". Use regex "(?!^)" to split String into characters.
 ##### Task014
 In task013 this is a pretty quick computation which hardly keeps the JavaFX thread busy. But in the real world, running database queries or HTTP requests can take awhile. The last thing we want is for these rapid inputs to create a queue of requests that will quickly make the application unusable as it works through the queue. Let's emulate this by using the delay() operator. Remember that the delay() operator already specifies a subscribeOn() internally, but we can specify an argument which Scheduler it uses. Let's put it in the IO Scheduler. The Observer must receive each emission on the JavaFX thread, so be sure to observeOn() the JavaFX Scheduler before the emission goes to the Observer .
 
-Now if we click several items on the top ListView , you will notice a 3-second lag before the letters show up on the bottom ListView . This emulates longrunning requests for each click, and now we have these requests queuing up and causing the bottom ListView to go berserk, trying to display each previous request before it gets to the current one. Obviously, this is undesirable. We likely want to kill previous requests when a new one comes in, and this is simple to do.
-Example060
+Now if we click several items on the top ListView , you will notice a 3-second lag before the letters show up on the bottom ListView . This emulates long running requests for each click, and now we have these requests queuing up and causing the bottom ListView to go berserk, trying to display each previous request before it gets to the current one. Obviously, this is undesirable. We likely want to kill previous requests when a new one comes in, and this is simple to do.
+##### Example060
 ```java
 JavaFxObservable.valuesOf(listView.getSelectionModel().selectedItemProperty())
 .switchMap(letter -> Observable.fromArray(letter.split("(?!^)")).delay(3, TimeUnit.SECONDS, Schedulers.io()).toList().toObservable())
@@ -1133,7 +1134,7 @@ JavaFxObservable.valuesOf(listView.getSelectionModel().selectedItemProperty())
 ```	
 The switchMap() works identically to any variant of flatMap() , but it will only chase after the latest user input and kill any previous requests. In other words, it is only chasing after the latest Observable derived from the latest emission, and unsubscribing any previous requests. The switchMap() is a powerful utility to create responsive and resilient UI's, and is the perfect way to handle click-happy users!
 You can also use the switchMap() to cancel long-running or infinite processes using a neat little trick with Observable.empty() . For instance, a ToggleButton has a true/false state depending on whether it is selected. When you emit its false state, you can return an empty Observable to kill the previous processing Observable , as shown below. When the ToggleButton is selected, it will kick off an Observable.interval() that emits a consecutive integer every 10 milliseconds. But unselecting the ToggleButton will cause the flatMap() to switch to an Observable.empty() , killing and unsubscribing from the Observable.interval()
-Example061
+##### Example061
 ```java
 ToggleButton toggleButton = new ToggleButton("Start");
 Label label = new Label("0");
