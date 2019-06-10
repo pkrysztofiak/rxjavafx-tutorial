@@ -582,25 +582,25 @@ Up to this point we only have worked with events. There is some metadata on even
 JavaFX has many implementations of its ObservableValue<T> type. This is essentially a wrapper around a mutable value of a type T , and it notifies any listeners when the value changes. This provides a perfect opportunity to hook a listener onto it and make a reactive stream of value changes.
 Let's create a simple ComboBox and hook up to it's value property.
 ```java
-	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
-	StackPane stackPane = new StackPane(comboBox);
-	Scene scene = new Scene(stackPane, 400, 400);
-	stage.setScene(scene);
-	stage.show();
-	JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
+ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+StackPane stackPane = new StackPane(comboBox);
+Scene scene = new Scene(stackPane, 400, 400);
+stage.setScene(scene);
+stage.show();
+JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
 ```
 Example024
 
 Every selection change should produce output in a from of new value printed to console.
 Let's modify our example a little and selected some value before running our subscription mechanism.
 ```java
-	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
-	StackPane stackPane = new StackPane(comboBox);
-	Scene scene = new Scene(stackPane, 400, 400);
-	stage.setScene(scene);
-	stage.show();
-	comboBox.setValue("Gamma");
-	JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
+ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+StackPane stackPane = new StackPane(comboBox);
+Scene scene = new Scene(stackPane, 400, 400);
+stage.setScene(scene);
+stage.show();
+comboBox.setValue("Gamma");
+JavaFxObservable.valuesOf(comboBox.valueProperty()).subscribe(System.out::println);
 ```
 Example025
 After running the app the output is:
@@ -609,12 +609,12 @@ After running the app the output is:
 Rx emmited current value as a first thing after the subscription started.
 Notice that the Example023 Rx did not push the initial null value. This is because RxJava 2 does not emit null values. However, you can use nullableValuesOf() to get the null values wrapped within Optional object.
 ```java
-	ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
-	StackPane stackPane = new StackPane(comboBox);
-	Scene scene = new Scene(stackPane, 400, 400);
-	stage.setScene(scene);
-	stage.show();
-	JavaFxObservable.nullableValuesOf(comboBox.valueProperty()).subscribe(optional -> System.out.println(optional.orElse("N/A")));
+ComboBox<String> comboBox = new ComboBox<>(FXCollections.observableArrayList("Alpha", "Beta", "Gamma", "Delta", "Epsilon"));
+StackPane stackPane = new StackPane(comboBox);
+Scene scene = new Scene(stackPane, 400, 400);
+stage.setScene(scene);
+stage.show();
+JavaFxObservable.nullableValuesOf(comboBox.valueProperty()).subscribe(optional -> System.out.println(optional.orElse("N/A")));
 ```
 Example026
 
@@ -625,13 +625,13 @@ Again, you can use this factory on any ObservableValue . This means you can hook
 #### cahangesOf()
 You also have the option of pushing the old and new value in a Change item through the changesOf() factory. This can be helpful for validation, and you can restore that old value back into the control if the new value fails to meet a condition.
 ```java
-	TextField textField = new TextField();
-	Scene scene = new Scene(textField);
-	stage.setScene(scene);
-	stage.show();
-	JavaFxObservable.changesOf(textField.textProperty())
-	.map(change -> change.getNewVal().matches("[0-9]*") ? change.getNewVal() : change.getOldVal())
-	.subscribe(textField::setText);
+TextField textField = new TextField();
+Scene scene = new Scene(textField);
+stage.setScene(scene);
+stage.show();
+JavaFxObservable.changesOf(textField.textProperty())
+.map(change -> change.getNewVal().matches("[0-9]*") ? change.getNewVal() : change.getOldVal())
+.subscribe(textField::setText);
 ```
 Example027
 
@@ -641,22 +641,22 @@ However, these ObservableCollections can have custom listeners added to them. Th
 ####emitOnChanged()
 Let's create a simple application backed by an ObservableList of Strings. There will be a ListView\<String> to display these values, and another ListView\<Integer> that will hold their lengths. We will use a TextField and a Button to add Strings to the ObservableList , and both ListViews should update accordingly with each addition.
 ```java
-	ListView<String> listView = new ListView<>();
-	ListView<Integer> lenghtsListView = new ListView<>();
-	HBox hBox = new HBox(listView, lenghtsListView);
-	TextField textField = new TextField();
-	Button button = new Button("Add");
-	HBox hBox2 = new HBox(textField, button);
-	VBox vBox = new VBox(hBox, hBox2);
-	Scene scene = new Scene(vBox);
-	stage.setScene(scene);
-	stage.show();
-	
-	JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(listView.getItems()::add);
-	
-	JavaFxObservable.emitOnChanged(listView.getItems())
-	.flatMapSingle(items -> Observable.fromIterable(items).map(String::length).toList())
-	.subscribe(lenghtsListView.getItems()::setAll);
+ListView<String> listView = new ListView<>();
+ListView<Integer> lenghtsListView = new ListView<>();
+HBox hBox = new HBox(listView, lenghtsListView);
+TextField textField = new TextField();
+Button button = new Button("Add");
+HBox hBox2 = new HBox(textField, button);
+VBox vBox = new VBox(hBox, hBox2);
+Scene scene = new Scene(vBox);
+stage.setScene(scene);
+stage.show();
+
+JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(listView.getItems()::add);
+
+JavaFxObservable.emitOnChanged(listView.getItems())
+.flatMapSingle(items -> Observable.fromIterable(items).map(String::length).toList())
+.subscribe(lenghtsListView.getItems()::setAll);
 ```
 Example028
 
@@ -685,47 +685,44 @@ Note that this factory has no initial emission. It will only emit additions goin
 #### updatesOf()
 An UPDATED emission occurs when an ObservableValue property of a T item in an ObservableList\<T> changes. Consider a User class with an updateable Property called name.
 ```java
-    class User {
-    	private final StringProperty nameProperty = new SimpleStringProperty();
-    
-    	public User(String name) {
-    		nameProperty.set(name);
-    	}
-    	public void setName(String name) {
-    		nameProperty.set(name);
-    	}
-    	public StringProperty nameProperty() {
-    		return nameProperty;
-    	}
-    	@Override
-    	public String toString() {
-    		return "User[name=" + nameProperty.get() + "]";
-    	}
-    }
+class User {
+
+	private final StringProperty nameProperty = new SimpleStringProperty();
+
+	public User(String name) {
+		nameProperty.set(name);
+	}
+	public void setName(String name) {
+		nameProperty.set(name);
+	}
+	public StringProperty nameProperty() {
+		return nameProperty;
+	}
+	@Override
+	public String toString() {
+		return "User[name=" + nameProperty.get() + "]";
+	}
+}
 ```
 ```java
-	User john = new User("John");
-	User lucy = new User("Lucy");
+User john = new User("John");
+User lucy = new User("Lucy");
 
-	ObservableList<User> users = FXCollections.observableArrayList(user -> new ObservableValue[] {user.nameProperty()});
-	users.addAll(john, lucy);
+ObservableList<User> users = FXCollections.observableArrayList(user -> new ObservableValue[] {user.nameProperty()});
+users.addAll(john, lucy);
 
-	JavaFxObservable.updatesOf(users).subscribe(System.out::println);
+JavaFxObservable.updatesOf(users).subscribe(System.out::println);
 
-	john.setName("Johnny");
-	lucy.setName("Lucinda");
+john.setName("Johnny");
+lucy.setName("Lucinda");
 ```
-Example03
-
-
-
+Example030
 
 Produces output:
 
     User[name=Johnny]
     User[name=Lucinda]
-Whenever this name property for any User changes, this change will be
-pushed as an emission.
+Whenever this name property for any User changes, this change will be pushed as an emission.
 ## Combining Observables
 There are several ways to combine emissions from multiple Observables, and we will cover many of these combine operators.
 #### concat()
