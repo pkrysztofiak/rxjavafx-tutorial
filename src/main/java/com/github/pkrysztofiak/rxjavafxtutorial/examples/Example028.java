@@ -30,7 +30,10 @@ public class Example028 extends Application {
 		stage.setScene(scene);
 		stage.show();
 
-		JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(listView.getItems()::add);
+		JavaFxObservable.actionEventsOf(button).map(event -> textField.getText()).subscribe(text -> {
+			listView.getItems().add(text);
+			textField.setText("");
+		});
 
 		JavaFxObservable.emitOnChanged(listView.getItems())
 		.flatMapSingle(items -> Observable.fromIterable(items).map(String::length).toList())

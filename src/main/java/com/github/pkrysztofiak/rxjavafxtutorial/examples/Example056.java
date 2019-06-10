@@ -24,8 +24,9 @@ public class Example056 extends Application {
 		Observable.just("one", "two", "three")
 		.observeOn(Schedulers.io())
 		.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+		.toList()
 		.observeOn(JavaFxScheduler.platform())
-		.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
-		.subscribe(listView.getItems()::add);
+		.doOnSuccess(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+		.subscribe(listView.getItems()::setAll);
 	}
 }

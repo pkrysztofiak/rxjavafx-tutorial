@@ -27,8 +27,9 @@ public class Example057 extends Application {
 		.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
 		.delay(3, TimeUnit.SECONDS, Schedulers.io())
 		.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+		.toList()
 		.observeOn(JavaFxScheduler.platform())
-		.doOnNext(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
-		.subscribe(listView.getItems()::add);
+		.doOnSuccess(next -> System.out.println("[" + Thread.currentThread().getName() + "] next=" + next))
+		.subscribe(listView.getItems()::setAll);
 	}
 }
