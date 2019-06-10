@@ -807,37 +807,41 @@ Write an app which reflects state of delta x and delta y between mouse pressed a
 The switchMap() works identically to any variant of flatMap() , but it will only chase after the last Observable emissions.
 Let's have an employee class
 ```java
-    public class Employee {
-    	private final StringProperty nameProperty = new SimpleStringProperty();
-    	private final Observable<String> nameObservable = JavaFxObservable.valuesOf(nameProperty);
-    
-    	public Employee(String name) {
-    		nameProperty.set(name);
-    	}
-    	public String getName() {
-			return nameProperty.get();
-		}
-    	public void setName(String name) {
-    		nameProperty.set(name);
-    	}
-    	public Observable<String> nameObservable() {
-    		return nameObservable;
-    	}
-    }
+public class Employee {
+	private final StringProperty nameProperty = new SimpleStringProperty();
+	private final Observable<String> nameObservable = JavaFxObservable.valuesOf(nameProperty);
+
+	public Employee(String name) {
+		nameProperty.set(name);
+	}
+
+	public String getName() {
+		return nameProperty.get();
+	}
+	public void setName(String name) {
+		nameProperty.set(name);
+	}
+	public StringProperty nameProperty() {
+		return nameProperty;
+	}
+	public Observable<String> nameObservable() {
+		return nameObservable;
+	}
+}
 ```
 Let's create list of three employees and flatMap to their nameProperty.
 ```java
-	Employee john = new Employee("John");
-	Employee emily = new Employee("Emily");
-	Employee alastair = new Employee("Alastair");
+Employee john = new Employee("John");
+Employee emily = new Employee("Emily");
+Employee alastair = new Employee("Alastair");
 
-	Observable.just(john, emily, alastair)
-	.flatMap(employee -> employee.nameObservable())
-	.subscribe(System.out::println);
+Observable.just(john, emily, alastair)
+.flatMap(employee -> employee.nameObservable())
+.subscribe(System.out::println);
 
-	john.setName("Johnny");
-	emily.setName("Em");
-	alastair.setName("Al");
+john.setName("Johnny");
+emily.setName("Em");
+alastair.setName("Al");
 ```
 Example035
 
